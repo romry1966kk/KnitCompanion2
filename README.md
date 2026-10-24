@@ -6,7 +6,7 @@ Program do pracy nad detalami na drutach: przechowuje wzory (np. warkocz, kwiate
 
 ## Adres programu
 
-[wpisz adres strony, np. https://nazwa.github.io/KnitCompanion2/]
+https://romry1966kk.github.io/KnitCompanion2/
 
 Adres musi pozostać stały. Dane zapisują się w przeglądarce i są przypisane do adresu, więc po jego zmianie program będzie pusty (patrz „Kopia zapasowa”).
 
