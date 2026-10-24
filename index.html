@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Knit Companion">
-<title>Knit Companion v 2.0 (C)2026</title>
+<title>Knit Companion v 2.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧶%3C/text%3E%3C/svg%3E">
 <style>
 /* ===== KOLORY (jasny i ciemny tryb – kolory ze starego programu) ===== */
 :root{
@@ -35,8 +36,8 @@ h1{margin:4px 0 0;font-size:clamp(24px,5vw,34px)}
 header p{margin:2px 0 0;font-size:18px;color:var(--sub)}
 #offline{display:none;position:absolute;right:0;top:0;background:#d62b2b;color:#fff;font-weight:700;
   font-size:13px;padding:5px 10px;border-radius:12px}
-nav{display:flex;gap:8px}
-nav button{flex:1;padding:12px;font-size:17px;font-weight:600;background:transparent;color:var(--brown)}
+nav{display:flex;gap:6px}
+nav button{flex:1;padding:12px 4px;font-size:clamp(13px,3.6vw,17px);font-weight:600;background:transparent;color:var(--brown)}
 nav button.on{background:var(--brown);color:var(--on-brown)}
 section{display:none;flex-direction:column;gap:14px}
 section.on{display:flex}
@@ -75,7 +76,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 <main>
   <header>
     <span id="offline">OFFLINE</span>
-    <h1 id="tytul"></h1>
+    <h1>🧶 <span id="tytul"></span></h1>
     <p id="autor"></p>
   </header>
 
@@ -83,6 +84,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     <button data-tab="sled" class="on">Śledzenie</button>
     <button data-tab="wzory">Wzory</button>
     <button data-tab="prace">Prace</button>
+    <button data-tab="ust">Ustawienia</button>
   </nav>
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE ===== -->
@@ -129,6 +131,10 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     <div class="flex"><label>Zdjęcie pracy<input type="file" id="photoIn" accept="image/*"></label></div>
     <div id="places"></div>
     <button id="placeNew">Dodaj miejsce użycia wzoru</button>
+  </section>
+
+  <!-- ===== ZAKŁADKA 4: USTAWIENIA (kopia zapasowa; tu dojdą kolejne opcje) ===== -->
+  <section id="ust">
     <div class="card">
       <b>Kopia zapasowa</b>
       <div class="flex"><button id="exp">Zapisz do pliku</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
@@ -144,8 +150,9 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    USTAWIENIA GŁÓWNE – tutaj zmieniasz najważniejsze rzeczy
    ========================================================= */
 const USTAWIENIA = {
-  tytul:   "Knit Companion v 2.0 (C)2026",
+  tytul:   "Knit Companion v 2.0",
   autor:   "Marta Matulewicz",
+  rok:     "2026",                     // rok w stopce po znaku ©
   klucz:   "KnitCompanion2:v1",      // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                       // największa szerokość wzoru
   maxRzedow: 60,                      // największa liczba rzędów rapportu
@@ -380,7 +387,7 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
 $("autor").textContent = USTAWIENIA.autor;
-$("stopka").textContent = USTAWIENIA.tytul + " · " + USTAWIENIA.autor;
+$("stopka").textContent = USTAWIENIA.tytul + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
 DB = wczytaj(); stanSieci(); wszystko();
 </script>
 </body>
