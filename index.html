@@ -8,7 +8,7 @@
 <title>Knit Companion v 2.0</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧶%3C/text%3E%3C/svg%3E">
 <style>
-/* ===== KOLORY (jasny i ciemny tryb – kolory ze starego programu) ===== */
+/* ===== KOLORY (jasny i ciemny tryb) ===== */
 :root{
   box-sizing:border-box;
   --bg:#f6f0ea; --card:#ece1d6; --ink:#2b2119; --sub:#7a6a5c;
@@ -33,7 +33,6 @@ body{margin:0;background:var(--bg);color:var(--ink);touch-action:manipulation;-w
 main{max-width:980px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-direction:column;gap:16px}
 header{text-align:center;position:relative}
 h1{margin:4px 0 0;font-size:clamp(24px,5vw,34px)}
-header p{margin:2px 0 0;font-size:18px;color:var(--sub)}
 #offline{display:none;position:absolute;right:0;top:0;background:#d62b2b;color:#fff;font-weight:700;
   font-size:13px;padding:5px 10px;border-radius:12px}
 nav{display:flex;gap:6px}
@@ -49,10 +48,12 @@ button:active{transform:scale(.97)}
 .main-btn{background:var(--brown);color:var(--on-brown);font-size:22px;font-weight:700;padding:18px 26px;width:100%;max-width:420px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:640px){.row2{grid-template-columns:1fr}}
-.photo{width:100%;max-height:420px;object-fit:cover;border-radius:18px;display:block;background:var(--card);min-height:80px}
+.photo{width:100%;max-height:420px;object-fit:cover;border-radius:18px;display:block;background:var(--card)}
 .pattern{display:flex;flex-direction:column;gap:10px}
 .instr{background:var(--card);color:var(--brown);border-radius:12px;padding:12px;text-align:center;
   font-size:18px;font-weight:600;min-height:3.2em;display:flex;align-items:center;justify-content:center}
+.koniec{display:none;background:var(--brown);color:var(--on-brown);border-radius:12px;padding:12px;
+  text-align:center;font-size:18px;font-weight:700}
 .crow{display:grid;gap:1px;margin-bottom:1px}
 .c{aspect-ratio:1/.85;display:flex;align-items:center;justify-content:center;background:var(--cell);
   border:1px solid var(--line);font-size:clamp(9px,1.6vw,13px);font-weight:600;overflow:hidden}
@@ -60,7 +61,7 @@ button:active{transform:scale(.97)}
 .between{background:var(--card);color:var(--sub);font-size:12px;text-align:center;padding:3px;border-radius:4px;margin-bottom:1px}
 .now.between{background:var(--cell-now);color:var(--ink)}
 .counter{background:var(--card);border-radius:22px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.big{font-size:72px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.big{font-size:72px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;border:none;background:none;color:var(--ink);padding:0 12px}
 .card{background:var(--card);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .flex>input{flex:1}
@@ -81,64 +82,70 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <nav>
     <button data-tab="sled" class="on">Śledzenie</button>
-    <button data-tab="wzory">Wzory</button>
-    <button data-tab="prace">Prace</button>
+    <button data-tab="proj">Projekt</button>
     <button data-tab="ust">Ustawienia</button>
   </nav>
 
-  <!-- ===== ZAKŁADKA 1: ŚLEDZENIE ===== -->
+  <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
-    <div class="flex"><select id="selProj"></select><select id="selPlace"></select></div>
+    <select id="selOb" aria-label="Obszar"></select>
+    <div class="hint" id="pnazwa"></div>
     <div class="row2">
-      <img class="photo" id="foto" alt="Zdjęcie pracy">
+      <img class="photo" id="foto" alt="Zdjęcie projektu">
       <div class="pattern">
+        <div class="koniec" id="koniec">Koniec wzoru – możesz skończyć albo iść dalej.</div>
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
       </div>
     </div>
     <div class="counter">
       <div>AKTUALNY RZĄD</div>
-      <div class="big" id="big">1</div>
+      <button class="big" id="big" title="Dotknij, aby wpisać numer rzędu">1</button>
       <button class="main-btn" id="next">Ukończyłam rząd</button>
       <button id="prev">Cofnij rząd</button>
     </div>
   </section>
 
-  <!-- ===== ZAKŁADKA 2: WZORY (edytor + słownik symboli) ===== -->
-  <section id="wzory">
-    <div class="flex"><select id="selPat"></select><button id="patNew">Nowy wzór</button><button id="patDel">Usuń</button></div>
-    <div class="flex"><input id="patName" placeholder="Nazwa wzoru"></div>
-    <div class="flex">
-      <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
-      <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
+  <!-- ===== ZAKŁADKA 2: PROJEKT (cały sweter: obszary i wzory) ===== -->
+  <section id="proj">
+    <div class="flex"><input id="projName" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button></div>
+    <label>Zdjęcie projektu (opcjonalne)<input type="file" id="photoIn" accept="image/*"></label>
+
+    <div class="card">
+      <b>Obszary</b>
+      <div class="hint">Obszar to miejsce na robótce, gdzie jest wzór (np. Prawy przód, Rękaw).</div>
+      <div id="obszary"></div>
+      <button id="obNew">Dodaj obszar</button>
     </div>
-    <div class="flex pal" id="pal"></div>
-    <div id="grid"></div>
-    <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Wpisuj tylko rzędy po prawej stronie – rzędy powrotne program doda sam.</div>
-    <div class="card" id="rowTexts"></div>
+
+    <div class="card">
+      <b>Wzory</b>
+      <div class="flex"><select id="selPat"></select><button id="patNew">Nowy wzór</button><button id="patDel">Usuń</button></div>
+      <div class="flex"><input id="patName" placeholder="Nazwa wzoru"></div>
+      <div class="flex">
+        <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
+        <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
+      </div>
+      <label>Ilość rzędów, po której pokazać koniec wzoru (0 = bez końca)<input type="number" min="0" id="patN"></label>
+      <div class="flex pal" id="pal"></div>
+      <div id="grid"></div>
+      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Wpisuj tylko rzędy po prawej stronie – rzędy powrotne program doda sam.</div>
+      <div id="rowTexts" class="card"></div>
+    </div>
+  </section>
+
+  <!-- ===== ZAKŁADKA 3: USTAWIENIA (słownik symboli, zapis projektu) ===== -->
+  <section id="ust">
+    <div class="card">
+      <b>Zapis projektu</b>
+      <div class="flex"><button id="exp">Zapisz w Plikach</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie zastępuje bieżący projekt.</div>
+    </div>
     <div class="card">
       <b>Słownik symboli</b>
       <div id="symTab"></div>
       <button id="symAdd">Dodaj symbol</button>
-    </div>
-  </section>
-
-  <!-- ===== ZAKŁADKA 3: PRACE (projekty, miejsca użycia, kopie) ===== -->
-  <section id="prace">
-    <div class="flex"><select id="selProj2"></select><button id="projNew">Nowa praca</button><button id="projDel">Usuń</button></div>
-    <div class="flex"><input id="projName" placeholder="Nazwa pracy"></div>
-    <div class="flex"><label>Zdjęcie pracy<input type="file" id="photoIn" accept="image/*"></label></div>
-    <div id="places"></div>
-    <button id="placeNew">Dodaj miejsce użycia wzoru</button>
-  </section>
-
-  <!-- ===== ZAKŁADKA 4: USTAWIENIA (kopia zapasowa; tu dojdą kolejne opcje) ===== -->
-  <section id="ust">
-    <div class="card">
-      <b>Kopia zapasowa</b>
-      <div class="flex"><button id="exp">Zapisz w Plikach</button><button id="dl">Pobierz kopię</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
-      <div class="hint" id="info"></div>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie zastępuje wszystkie dane na tym urządzeniu.</div>
+      <div class="hint">Słownik zapisuje się razem z projektem. Zmiana samego znaku zmienia sens narysowanych wzorów.</div>
     </div>
   </section>
 
@@ -151,16 +158,17 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
+  wersja:  ".2",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
-  wersja:  ".1",                        // dopisek do tytułu w stopce, np. ".1" daje v 2.0.1
-  rok:     "2026",                     // rok w stopce po znaku ©
-  klucz:   "KnitCompanion2:v1",      // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
-  maxOczek: 60,                       // największa szerokość wzoru
-  maxRzedow: 60,                      // największa liczba rzędów rapportu
-  podgladRzedow: 8,                   // ile rzędów widać w podglądzie
+  rok:     "2026",
+  klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
+  maxOczek: 60,                         // największa szerokość wzoru
+  maxRzedow: 60,                        // największa liczba rzędów wzoru
+  podgladRzedow: 8,                     // ile rzędów widać w podglądzie
+  fotoDomyslne: "img/domyslne.jpg",     // zdjęcie przykładowego projektu
   tekstPowrot: "Powrót: przerabiaj oczka tak, jak schodzą z drutu.",
   tekstGladki: "Rząd gładki: przerabiaj oczka tak, jak je widzisz.",
-  /* Domyślny słownik symboli (symbol = znak w komórce). Marta edytuje go w zakładce Wzory. */
+  /* Domyślny słownik symboli (symbol = znak w komórce) */
   symbole: [
     {s:"P",  n:"prawe"},
     {s:"L",  n:"lewe"},
@@ -170,55 +178,55 @@ const USTAWIENIA = {
 };
 
 /* =========================================================
-   DANE – jedna struktura zapisywana w całości
-   wzory:  {id, nazwa, w, rzedy:[{kom:[symbole], tekst}]}
-   prace:  {id, nazwa, foto, miejsca:[{id,nazwa,wzor,tryb,start,od,rzad}]}
-   tryb: "plasko" albo "okragle"; start = rząd, w którym zaczyna się wzór;
-   od = od którego rzędu rapportu zaczynasz; rzad = aktualny rząd robótki
+   DANE – w przeglądarce jest jeden projekt (cały sweter)
+   projekt: {nazwa, foto, wzory:[...], obszary:[...]}
+   wzór:    {id, nazwa, w (oczka), n (po ilu rzędach pokazać koniec, 0 = bez końca), rzedy:[{kom, tekst}]}
+   obszar:  {id, nazwa, wzor (id wzoru), tryb ("plasko"/"okragle"), licznik (numer rzędu)}
+   Licznik zmienia się tylko w zakładce Śledzenie.
    ========================================================= */
-let DB = null, pen = "P";
+let DB = null, pen = "P", aktWzor = null;
 /* gdy elementu nie ma na stronie, dostajemy pusty zamiennik zamiast błędu */
 const $ = id => document.getElementById(id) || {style:{}, classList:{toggle(){}}, addEventListener(){}};
 const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const liczba = (v, min) => Math.max(min, parseInt(v, 10) || min);
+const opcje = (lista, wybrany) => lista.map(x => `<option value="${x.id}"${x.id === wybrany ? " selected":""}>${esc(x.nazwa)}</option>`).join("");
+const pusty = () => ({id:uid(), nazwa:"Nowy wzór", w:16, n:0, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
 
-/* Przykładowe dane: warkocz ze starego kardiganu */
+/* Projekt przykładowy: kardigan Marty z warkoczem */
 function dane0(){
   const wiersz1 = [..."LL", ..."PPPP", ..."\\\\\\\\", ..."PPPP", ..."LL"];
   const wiersz2 = [..."LL", ..."////", ..."PPPPPPPP", ..."LL"];
-  const wzor = {id:"w1", nazwa:"Warkocz 4 oczka", w:16, rzedy:[
+  const wzor = {id:"w1", nazwa:"Warkocz 4 oczka", w:16, n:0, rzedy:[
     {kom:wiersz1, tekst:"Krzyżuj 4 środkowe oczka do tyłu."},
     {kom:wiersz2, tekst:"Krzyżuj 4 pierwsze oczka do przodu."}]};
-  const m = (nazwa, start, tryb, od) => ({id:uid(), nazwa, wzor:"w1", tryb, start, od, rzad:start});
-  return {v:2, symbole:USTAWIENIA.symbole.map(x => ({...x})), wzory:[wzor],
-    prace:[{id:"p1", nazwa:"Kardigan (przykład)", foto:"", miejsca:[
-      m("Dół swetra",29,"plasko",1), m("Prawy przód",1,"plasko",1), m("Lewy przód",1,"plasko",1),
-      m("Rękaw pierwszy",1,"okragle",2), m("Rękaw drugi",1,"okragle",2)]}],
-    ap:{praca:"p1", miejsce:null}};
+  const ob = (nazwa, tryb) => ({id:uid(), nazwa, wzor:"w1", tryb, licznik:1});
+  return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
+    projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne, wzory:[wzor],
+      obszary:[ob("Dół swetra","plasko"), ob("Prawy przód","plasko"), ob("Lewy przód","plasko"),
+               ob("Rękaw pierwszy","okragle"), ob("Rękaw drugi","okragle")]},
+    ap:null};
 }
 function wczytaj(){
-  try { const t = JSON.parse(localStorage.getItem(USTAWIENIA.klucz) || "null"); if (t && t.wzory && t.prace) return t; } catch(e){}
+  try { const t = JSON.parse(localStorage.getItem(USTAWIENIA.klucz) || "null"); if (t && t.v === 3 && t.projekt) return t; } catch(e){}
   return dane0();
 }
 function zapisz(){
   try { localStorage.setItem(USTAWIENIA.klucz, JSON.stringify(DB)); }
-  catch(e){ alert("Nie udało się zapisać danych (brak miejsca?). Zapisz kopię do pliku."); }
+  catch(e){ alert("Nie udało się zapisać danych w przeglądarce. Zapisz projekt do pliku."); }
 }
-const praca = () => DB.prace.find(p => p.id === DB.ap.praca) || DB.prace[0];
-const miejsce = () => { const p = praca(); return p && (p.miejsca.find(m => m.id === DB.ap.miejsce) || p.miejsca[0]); };
-const wzorDla = m => m && DB.wzory.find(w => w.id === m.wzor);
-const opcje = (lista, wybrany, nazwa = "nazwa") => lista.map(x => `<option value="${x.id}"${x.id === wybrany ? " selected":""}>${esc(x[nazwa])}</option>`).join("");
+const P = () => DB.projekt;
+const obszar = () => P().obszary.find(o => o.id === DB.ap) || P().obszary[0];
+const wzorDla = o => o && P().wzory.find(w => w.id === o.wzor);
 
 /* =========================================================
    LOGIKA ŚLEDZENIA
-   Cykl = 2 × liczba rzędów rapportu: rząd wzoru, potem rząd powrotny
-   (płasko) albo gładki (na okrągło), i tak dalej.
+   Cykl = 2 × liczba rzędów wzoru: rząd wzoru, potem rząd powrotny
+   (płasko) albo gładki (na okrągło), i tak w kółko.
    ========================================================= */
-function pozycja(m, rzad){
-  const w = wzorDla(m); if (!w || !w.rzedy.length) return null;
-  const L = 2 * w.rzedy.length;
-  const p = (((rzad - m.start + 2 * (m.od - 1)) % L) + L) % L;
+function pozycja(o, licznik){
+  const w = wzorDla(o); if (!w || !w.rzedy.length) return null;
+  const L = 2 * w.rzedy.length, p = (((licznik - 1) % L) + L) % L;
   return p % 2 === 0 ? {w, r:p / 2} : {w, miedzy:true};
 }
 function wierszWzoru(w, r, now){
@@ -228,36 +236,46 @@ function wierszWzoru(w, r, now){
   return h + "</div>";
 }
 function rysujSledzenie(){
-  const p = praca(), m = miejsce();
-  $("selProj").innerHTML = opcje(DB.prace, p && p.id);
-  $("selPlace").innerHTML = p ? opcje(p.miejsca, m && m.id) : "";
-  $("foto").style.display = p && p.foto ? "block" : "none";
-  if (p && p.foto) $("foto").src = p.foto;
-  if (!m){ $("instr").textContent = "Dodaj miejsce użycia wzoru w zakładce Prace."; $("chart").innerHTML = ""; $("big").textContent = "–"; return; }
-  $("big").textContent = m.rzad;
-  const teraz = pozycja(m, m.rzad);
-  $("instr").textContent = !teraz ? "Wybierz wzór w zakładce Prace." :
-    teraz.miedzy ? (m.tryb === "plasko" ? USTAWIENIA.tekstPowrot : USTAWIENIA.tekstGladki) :
+  const o = obszar(), p = P();
+  $("pnazwa").textContent = p.nazwa;
+  $("selOb").innerHTML = opcje(p.obszary, o && o.id);
+  $("foto").style.display = p.foto ? "block" : "none";
+  if (p.foto) $("foto").src = p.foto;
+  if (!o){ $("instr").textContent = "Dodaj obszar w zakładce Projekt."; $("chart").innerHTML = ""; $("big").textContent = "–"; $("koniec").style.display = "none"; return; }
+  $("big").textContent = o.licznik;
+  const teraz = pozycja(o, o.licznik), w = wzorDla(o);
+  $("instr").textContent = !teraz ? "Wybierz wzór dla tego obszaru w zakładce Projekt." :
+    teraz.miedzy ? (o.tryb === "plasko" ? USTAWIENIA.tekstPowrot : USTAWIENIA.tekstGladki) :
     (teraz.w.rzedy[teraz.r].tekst || "Rząd wzoru " + (teraz.r + 1));
+  /* informacja o końcu wzoru: widoczna tylko na rzędzie równym N, znika po przekroczeniu lub cofnięciu */
+  $("koniec").style.display = (w && w.n > 0 && o.licznik === w.n) ? "block" : "none";
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
-    const q = pozycja(m, m.rzad + k); if (!q) break;
-    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${m.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${m.rzad + k}</div>` : wierszWzoru(q.w, q.r, k === 0);
+    const q = pozycja(o, o.licznik + k); if (!q) break;
+    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${o.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${o.licznik + k}</div>` : wierszWzoru(q.w, q.r, k === 0);
   }
   $("chart").innerHTML = h;
 }
-const zmien = d => { const m = miejsce(); if (m){ m.rzad = Math.max(1, m.rzad + d); zapisz(); rysujSledzenie(); } };
+const zmien = d => { const o = obszar(); if (o){ o.licznik = Math.max(1, o.licznik + d); zapisz(); rysujSledzenie(); } };
 
 /* =========================================================
-   EDYTOR WZORÓW
+   ZAKŁADKA PROJEKT: obszary i edytor wzorów
    ========================================================= */
-let aktWzor = null;
-const wzor = () => DB.wzory.find(w => w.id === aktWzor) || DB.wzory[0];
-function rysujWzory(){
-  const w = wzor(); if (!w){ $("grid").innerHTML = ""; return; }
+const wzor = () => P().wzory.find(w => w.id === aktWzor) || P().wzory[0];
+function rysujProjekt(){
+  const p = P();
+  $("projName").value = p.nazwa;
+  $("obszary").innerHTML = p.obszary.map((o, i) => `<div class="card">
+    <div class="flex"><input data-i="${i}" data-f="nazwa" value="${esc(o.nazwa)}"><button data-del="${i}">Usuń</button></div>
+    <div class="flex">
+      <label>Wzór<select data-i="${i}" data-f="wzor">${opcje(p.wzory, o.wzor)}</select></label>
+      <label>Tryb<select data-i="${i}" data-f="tryb"><option value="plasko"${o.tryb === "plasko" ? " selected":""}>płasko</option><option value="okragle"${o.tryb === "okragle" ? " selected":""}>na okrągło</option></select></label>
+    </div></div>`).join("");
+  const w = wzor();
+  $("selPat").innerHTML = opcje(p.wzory, w && w.id);
+  if (!w){ $("grid").innerHTML = ""; $("rowTexts").innerHTML = ""; $("pal").innerHTML = ""; return; }
   aktWzor = w.id;
-  $("selPat").innerHTML = opcje(DB.wzory, w.id);
-  $("patName").value = w.nazwa;
+  $("patName").value = w.nazwa; $("patN").value = w.n;
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
@@ -270,44 +288,24 @@ function rysujWzory(){
   $("grid").innerHTML = g;
   $("rowTexts").innerHTML = "<b>Instrukcje rzędów</b>" + w.rzedy.map((r, i) =>
     `<label>Rząd ${i + 1}<input data-t="${i}" value="${esc(r.tekst)}"></label>`).join("");
+}
+function rysujUstawienia(){
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button data-symdel="${i}">Usuń</button></div>`).join("");
 }
+function wszystko(){ rysujSledzenie(); rysujProjekt(); rysujUstawienia(); }
+
 function maluj(el){
   if (!el || el.dataset.r === undefined) return;
-  const w = wzor(), r = +el.dataset.r, c = +el.dataset.c;
-  w.rzedy[r].kom[c] = pen; el.textContent = pen;
+  const w = wzor(); w.rzedy[+el.dataset.r].kom[+el.dataset.c] = pen; el.textContent = pen;
 }
 function zmienRozmiar(dw, dh){
-  const w = wzor();
+  const w = wzor(); if (!w) return;
   w.w = Math.min(USTAWIENIA.maxOczek, Math.max(1, w.w + dw));
   const h = Math.min(USTAWIENIA.maxRzedow, Math.max(1, w.rzedy.length + dh));
   while (w.rzedy.length < h) w.rzedy.push({kom:[], tekst:""});
-  w.rzedy.length = h;
-  zapisz(); rysujWzory();
+  w.rzedy.length = h; zapisz(); rysujProjekt();
 }
-
-/* =========================================================
-   PRACE, MIEJSCA UŻYCIA, KOPIA ZAPASOWA
-   ========================================================= */
-function rysujPrace(){
-  const p = praca();
-  $("selProj2").innerHTML = opcje(DB.prace, p && p.id);
-  $("projName").value = p ? p.nazwa : "";
-  $("places").innerHTML = !p ? "" : p.miejsca.map((m, i) => `<div class="card">
-    <div class="flex"><input data-i="${i}" data-f="nazwa" value="${esc(m.nazwa)}"><button data-del="${i}">Usuń</button></div>
-    <div class="flex">
-      <label>Wzór<select data-i="${i}" data-f="wzor">${opcje(DB.wzory, m.wzor)}</select></label>
-      <label>Tryb<select data-i="${i}" data-f="tryb"><option value="plasko"${m.tryb === "plasko" ? " selected":""}>płasko</option><option value="okragle"${m.tryb === "okragle" ? " selected":""}>na okrągło</option></select></label>
-    </div>
-    <div class="flex">
-      <label>Wzór zaczyna się w rzędzie<input type="number" min="1" data-i="${i}" data-f="start" value="${m.start}"></label>
-      <label>Zaczynam od rzędu wzoru<input type="number" min="1" data-i="${i}" data-f="od" value="${m.od}"></label>
-      <label>Aktualny rząd<input type="number" min="1" data-i="${i}" data-f="rzad" value="${m.rzad}"></label>
-    </div></div>`).join("");
-}
-function wszystko(){ rysujSledzenie(); rysujWzory(); rysujPrace(); }
-
 /* Zdjęcie zmniejszamy do 700 px, żeby zmieściło się w pamięci przeglądarki */
 function wczytajFoto(plik){
   const fr = new FileReader();
@@ -315,110 +313,96 @@ function wczytajFoto(plik){
     const sk = Math.min(1, 700 / Math.max(im.width, im.height)), cv = document.createElement("canvas");
     cv.width = Math.round(im.width * sk); cv.height = Math.round(im.height * sk);
     cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
-    praca().foto = cv.toDataURL("image/jpeg", 0.72); zapisz(); wszystko();
+    P().foto = cv.toDataURL("image/jpeg", 0.72); zapisz(); wszystko();
   }; im.src = fr.result; };
   fr.readAsDataURL(plik);
 }
 
 /* =========================================================
-   ZDARZENIA – podpięcie przycisków i pól
+   ZDARZENIA
    ========================================================= */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === b.dataset.tab));
   wszystko();
 });
+/* Śledzenie */
 $("next").onclick = () => zmien(1);
 $("prev").onclick = () => zmien(-1);
-$("selProj").onchange = $("selProj2").onchange = e => { DB.ap.praca = e.target.value; DB.ap.miejsce = null; zapisz(); wszystko(); };
-$("selPlace").onchange = e => { DB.ap.miejsce = e.target.value; zapisz(); rysujSledzenie(); };
+$("big").onclick = () => { const o = obszar(); if (!o) return;
+  const v = prompt("Numer rzędu:", o.licznik); if (v !== null){ o.licznik = liczba(v, 1); zapisz(); rysujSledzenie(); } };
+$("selOb").onchange = e => { DB.ap = e.target.value; zapisz(); rysujSledzenie(); };
+$("foto").onerror = () => $("foto").style.display = "none";
 
-/* edytor wzorów */
-$("selPat").onchange = e => { aktWzor = e.target.value; rysujWzory(); };
+/* Projekt: nazwa, zdjęcie, nowy projekt */
+$("projName").onchange = e => { P().nazwa = e.target.value || "Projekt"; zapisz(); wszystko(); };
+$("photoIn").onchange = e => { if (e.target.files[0]) wczytajFoto(e.target.files[0]); };
+$("projNew").onclick = () => {
+  if (!confirm("Zacząć nowy, pusty projekt? Bieżący zostanie zastąpiony – zapisz go wcześniej w Ustawieniach.")) return;
+  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()], obszary:[]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+};
+/* Projekt: obszary */
+$("obNew").onclick = () => { P().obszary.push({id:uid(), nazwa:"Nowy obszar", wzor:(P().wzory[0] || {}).id || "", tryb:"plasko", licznik:1}); zapisz(); wszystko(); };
+$("obszary").onchange = e => { const d = e.target.dataset, o = P().obszary[+d.i]; if (o){ o[d.f] = e.target.value; zapisz(); wszystko(); } };
+$("obszary").onclick = e => { if (e.target.dataset.del !== undefined && confirm("Usunąć ten obszar razem z jego licznikiem?")){ P().obszary.splice(+e.target.dataset.del, 1); zapisz(); wszystko(); } };
+/* Projekt: wzory */
+$("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
-$("patNew").onclick = () => { const w = {id:uid(), nazwa:"Nowy wzór", w:16, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]}; DB.wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
-$("patDel").onclick = () => { if (DB.wzory.length > 1 && confirm("Usunąć wzór? Miejsca, które go używają, stracą wzór.")){ DB.wzory = DB.wzory.filter(x => x.id !== aktWzor); aktWzor = null; zapisz(); wszystko(); } };
+$("patN").onchange = e => { wzor().n = liczba(e.target.value, 0); zapisz(); rysujSledzenie(); };
+$("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
+$("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór? Obszary, które go używają, stracą wzór.")) return;
+  P().wzory = P().wzory.filter(x => x.id !== w.id); P().obszary.forEach(o => { if (o.wzor === w.id) o.wzor = (P().wzory[0] || {}).id || ""; });
+  aktWzor = null; zapisz(); wszystko(); };
 $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmienRozmiar(1, 0);
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
-$("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujWzory(); } };
+$("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
 let maluje = false;
 $("grid").addEventListener("pointerdown", e => { maluje = true; maluj(e.target); });
 $("grid").addEventListener("pointermove", e => { if (maluje) maluj(document.elementFromPoint(e.clientX, e.clientY)); });
-window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); } });
+window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); rysujSledzenie(); } });
 $("rowTexts").onchange = e => { wzor().rzedy[+e.target.dataset.t].tekst = e.target.value; zapisz(); };
-$("symTab").onchange = e => { const d = e.target.dataset; if (d.sy !== undefined){ DB.symbole[+d.sy][d.f] = e.target.value; zapisz(); rysujWzory(); } };
-$("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ DB.symbole.splice(+e.target.dataset.symdel, 1); zapisz(); rysujWzory(); } };
-$("symAdd").onclick = () => { DB.symbole.push({s:"?", n:"nowy symbol"}); zapisz(); rysujWzory(); };
+/* Ustawienia: słownik symboli */
+$("symTab").onchange = e => { const d = e.target.dataset; if (d.sy !== undefined){ DB.symbole[+d.sy][d.f] = e.target.value; zapisz(); wszystko(); } };
+$("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ DB.symbole.splice(+e.target.dataset.symdel, 1); zapisz(); wszystko(); } };
+$("symAdd").onclick = () => { DB.symbole.push({s:"?", n:"nowy symbol"}); zapisz(); wszystko(); };
 
-/* prace i miejsca */
-$("projName").onchange = e => { praca().nazwa = e.target.value; zapisz(); wszystko(); };
-$("projNew").onclick = () => { const p = {id:uid(), nazwa:"Nowa praca", foto:"", miejsca:[]}; DB.prace.push(p); DB.ap.praca = p.id; DB.ap.miejsce = null; zapisz(); wszystko(); };
-$("projDel").onclick = () => { if (DB.prace.length > 1 && confirm("Usunąć całą pracę razem z postępem?")){ DB.prace = DB.prace.filter(x => x.id !== DB.ap.praca); DB.ap.praca = DB.prace[0].id; DB.ap.miejsce = null; zapisz(); wszystko(); } };
-$("photoIn").onchange = e => { if (e.target.files[0]) wczytajFoto(e.target.files[0]); };
-$("placeNew").onclick = () => { praca().miejsca.push({id:uid(), nazwa:"Nowe miejsce", wzor:DB.wzory[0].id, tryb:"plasko", start:1, od:1, rzad:1}); zapisz(); wszystko(); };
-$("places").onchange = e => {
-  const d = e.target.dataset, m = praca().miejsca[+d.i]; if (!m) return;
-  m[d.f] = ["start","od","rzad"].includes(d.f) ? liczba(e.target.value, 1) : e.target.value;
-  zapisz(); wszystko();
-};
-$("places").onclick = e => { if (e.target.dataset.del !== undefined && confirm("Usunąć to miejsce?")){ praca().miejsca.splice(+e.target.dataset.del, 1); zapisz(); wszystko(); } };
-
-/* kopia zapasowa */
-/* komunikat pod przyciskami kopii (przy testach pokazuje, co się stało) */
-const komunikat = t => $("info").textContent = t;
-
-/* nazwa pliku z datą i godziną, żeby kolejne kopie się nie myliły */
-function nazwaKopii(){
+/* Ustawienia: zapis i wczytanie projektu */
+function nazwaPliku(){
   const d = new Date(), z = n => String(n).padStart(2, "0");
-  return "KnitCompanion2 " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
+  return P().nazwa.replace(/[\\\/:*?"<>|]/g, "-") + " " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
          " " + z(d.getHours()) + "-" + z(d.getMinutes()) + ".json";
 }
-
-/* zwykłe pobranie (rezerwa, zawsze działa) */
 function pobierz(blob, nazwa){
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = nazwa; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
-
-/* zapis z wyborem miejsca:
-   1) okno zapisu (Edge i Chrome na komputerze) – można wskazać plik do zastąpienia
-   2) arkusz udostępniania (iPhone, iPad) – wybierz „Zapisz w Plikach”
-   3) zwykłe pobranie */
+/* 1) okno zapisu (Edge, Chrome na komputerze)  2) arkusz udostępniania (iPhone, iPad)  3) zwykłe pobranie */
 async function zapiszWPlikach(){
-  const nazwa = nazwaKopii(), tekst = JSON.stringify(DB);
-  const blob = new Blob([tekst], {type:"application/json"});
+  const nazwa = nazwaPliku(), tekst = JSON.stringify(DB), blob = new Blob([tekst], {type:"application/json"});
   try {
     if (window.showSaveFilePicker){
-      const h = await showSaveFilePicker({suggestedName:nazwa,
-        types:[{description:"Kopia Knit Companion", accept:{"application/json":[".json"]}}]});
-      const w = await h.createWritable(); await w.write(blob); await w.close();
-      komunikat("Zapisano: " + h.name); return;
+      const h = await showSaveFilePicker({suggestedName:nazwa, types:[{description:"Projekt Knit Companion", accept:{"application/json":[".json"]}}]});
+      const w = await h.createWritable(); await w.write(blob); await w.close(); return;
     }
     for (const typ of ["application/json", "text/plain"]){
       const f = new File([tekst], nazwa, {type:typ});
-      if (navigator.canShare && navigator.canShare({files:[f]})){
-        await navigator.share({files:[f]});
-        komunikat("Arkusz zamknięty. Użyty typ pliku: " + typ); return;
-      }
+      if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; }
     }
-    komunikat("To urządzenie nie przyjmuje pliku w arkuszu – pobieram zwykłym sposobem.");
-  } catch(e){
-    if (e && e.name === "AbortError"){ komunikat("Anulowano."); return; }
-    komunikat("Błąd: " + ((e && e.name) || e) + " – pobieram zwykłym sposobem.");
-  }
+  } catch(e){ if (e && e.name === "AbortError") return; }
   pobierz(blob, nazwa);
 }
 $("exp").onclick = zapiszWPlikach;
-$("dl").onclick = () => pobierz(new Blob([JSON.stringify(DB)], {type:"application/json"}), nazwaKopii());
 $("imp").onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   const fr = new FileReader();
   fr.onload = () => { try {
     const t = JSON.parse(fr.result);
-    if (!t.wzory || !t.prace || !t.symbole) throw 0;
-    if (confirm("Wczytać plik? Dane na tym urządzeniu zostaną zastąpione.")){ DB = t; aktWzor = null; zapisz(); wszystko(); }
-  } catch(err){ alert("To nie jest poprawny plik Knit Companion."); } };
+    if (t.v !== 3 || !t.projekt || !t.symbole) throw 0;
+    if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){
+      DB = t; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+    }
+  } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); } e.target.value = ""; };
   fr.readAsText(f);
 };
 
