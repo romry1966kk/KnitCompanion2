@@ -77,7 +77,6 @@ footer{text-align:center;color:var(--sub);font-size:14px}
   <header>
     <span id="offline">OFFLINE</span>
     <h1>🧶 <span id="tytul"></span></h1>
-    <!-- <p id="autor"></p> -->
   </header>
 
   <nav>
@@ -137,7 +136,8 @@ footer{text-align:center;color:var(--sub);font-size:14px}
   <section id="ust">
     <div class="card">
       <b>Kopia zapasowa</b>
-      <div class="flex"><button id="exp">Zapisz do pliku</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
+      <div class="flex"><button id="exp">Zapisz w Plikach</button><button id="dl">Pobierz kopię</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
+      <div class="hint" id="info"></div>
       <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie zastępuje wszystkie dane na tym urządzeniu.</div>
     </div>
   </section>
@@ -150,8 +150,9 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    USTAWIENIA GŁÓWNE – tutaj zmieniasz najważniejsze rzeczy
    ========================================================= */
 const USTAWIENIA = {
-  tytul:   "Knit Companion v 2.0.1",
+  tytul:   "Knit Companion v 2.0",
   autor:   "Marta Matulewicz",
+  wersja:  ".1",                        // dopisek do tytułu w stopce, np. ".1" daje v 2.0.1
   rok:     "2026",                     // rok w stopce po znaku ©
   klucz:   "KnitCompanion2:v1",      // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                       // największa szerokość wzoru
@@ -176,7 +177,8 @@ const USTAWIENIA = {
    od = od którego rzędu rapportu zaczynasz; rzad = aktualny rząd robótki
    ========================================================= */
 let DB = null, pen = "P";
-const $ = id => document.getElementById(id);
+/* gdy elementu nie ma na stronie, dostajemy pusty zamiennik zamiast błędu */
+const $ = id => document.getElementById(id) || {style:{}, classList:{toggle(){}}, addEventListener(){}};
 const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const liczba = (v, min) => Math.max(min, parseInt(v, 10) || min);
@@ -362,12 +364,53 @@ $("places").onchange = e => {
 $("places").onclick = e => { if (e.target.dataset.del !== undefined && confirm("Usunąć to miejsce?")){ praca().miejsca.splice(+e.target.dataset.del, 1); zapisz(); wszystko(); } };
 
 /* kopia zapasowa */
-$("exp").onclick = () => {
+/* komunikat pod przyciskami kopii (przy testach pokazuje, co się stało) */
+const komunikat = t => $("info").textContent = t;
+
+/* nazwa pliku z datą i godziną, żeby kolejne kopie się nie myliły */
+function nazwaKopii(){
+  const d = new Date(), z = n => String(n).padStart(2, "0");
+  return "KnitCompanion2 " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
+         " " + z(d.getHours()) + "-" + z(d.getMinutes()) + ".json";
+}
+
+/* zwykłe pobranie (rezerwa, zawsze działa) */
+function pobierz(blob, nazwa){
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(DB)], {type:"application/json"}));
-  a.download = "KnitCompanion2-" + new Date().toISOString().slice(0, 10) + ".json";
-  a.click();
-};
+  a.href = URL.createObjectURL(blob); a.download = nazwa; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* zapis z wyborem miejsca:
+   1) okno zapisu (Edge i Chrome na komputerze) – można wskazać plik do zastąpienia
+   2) arkusz udostępniania (iPhone, iPad) – wybierz „Zapisz w Plikach”
+   3) zwykłe pobranie */
+async function zapiszWPlikach(){
+  const nazwa = nazwaKopii(), tekst = JSON.stringify(DB);
+  const blob = new Blob([tekst], {type:"application/json"});
+  try {
+    if (window.showSaveFilePicker){
+      const h = await showSaveFilePicker({suggestedName:nazwa,
+        types:[{description:"Kopia Knit Companion", accept:{"application/json":[".json"]}}]});
+      const w = await h.createWritable(); await w.write(blob); await w.close();
+      komunikat("Zapisano: " + h.name); return;
+    }
+    for (const typ of ["application/json", "text/plain"]){
+      const f = new File([tekst], nazwa, {type:typ});
+      if (navigator.canShare && navigator.canShare({files:[f]})){
+        await navigator.share({files:[f]});
+        komunikat("Arkusz zamknięty. Użyty typ pliku: " + typ); return;
+      }
+    }
+    komunikat("To urządzenie nie przyjmuje pliku w arkuszu – pobieram zwykłym sposobem.");
+  } catch(e){
+    if (e && e.name === "AbortError"){ komunikat("Anulowano."); return; }
+    komunikat("Błąd: " + ((e && e.name) || e) + " – pobieram zwykłym sposobem.");
+  }
+  pobierz(blob, nazwa);
+}
+$("exp").onclick = zapiszWPlikach;
+$("dl").onclick = () => pobierz(new Blob([JSON.stringify(DB)], {type:"application/json"}), nazwaKopii());
 $("imp").onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   const fr = new FileReader();
@@ -386,8 +429,7 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 /* ===== START ===== */
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
-// $("autor").textContent = USTAWIENIA.autor;
-$("stopka").textContent = USTAWIENIA.tytul + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
+$("stopka").textContent = USTAWIENIA.tytul + USTAWIENIA.wersja + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
 DB = wczytaj(); stanSieci(); wszystko();
 </script>
 </body>
