@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Knit Companion">
 <title>Knit Companion v 2.0</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧶%3C/text%3E%3C/svg%3E">
@@ -88,7 +89,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
-    <select id="selOb" aria-label="Obszar"></select>
+    <select id="selOb" aria-label="Wzór"></select>
     <div class="hint" id="pnazwa"></div>
     <div class="row2">
       <img class="photo" id="foto" alt="Zdjęcie projektu">
@@ -106,22 +107,16 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     </div>
   </section>
 
-  <!-- ===== ZAKŁADKA 2: PROJEKT (cały sweter: obszary i wzory) ===== -->
+  <!-- ===== ZAKŁADKA 2: PROJEKT (zdjęcie i wzory – każdy wzór ma własny licznik i tryb) ===== -->
   <section id="proj">
     <div class="flex"><input id="projName" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button></div>
     <label>Zdjęcie projektu (opcjonalne)<input type="file" id="photoIn" accept="image/*"></label>
 
     <div class="card">
-      <b>Obszary</b>
-      <div class="hint">Obszar to miejsce na robótce, gdzie jest wzór (np. Prawy przód, Rękaw).</div>
-      <div id="obszary"></div>
-      <button id="obNew">Dodaj obszar</button>
-    </div>
-
-    <div class="card">
       <b>Wzory</b>
-      <div class="flex"><select id="selPat"></select><button id="patNew">Nowy wzór</button><button id="patDel">Usuń</button></div>
-      <div class="flex"><input id="patName" placeholder="Nazwa wzoru"></div>
+      <div class="flex"><select id="selPat"></select></div>
+      <div class="flex"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel">Usuń wzór</button></div>
+      <div class="flex"><input id="patName" placeholder="Nazwa wzoru"><select id="patTryb"><option value="plasko">płasko</option><option value="okragle">na okrągło</option></select></div>
       <div class="flex">
         <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
         <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
@@ -179,10 +174,10 @@ const USTAWIENIA = {
 
 /* =========================================================
    DANE – w przeglądarce jest jeden projekt (cały sweter)
-   projekt: {nazwa, foto, wzory:[...], obszary:[...]}
-   wzór:    {id, nazwa, w (oczka), n (po ilu rzędach pokazać koniec, 0 = bez końca), rzedy:[{kom, tekst}]}
-   obszar:  {id, nazwa, wzor (id wzoru), tryb ("plasko"/"okragle"), licznik (numer rzędu)}
-   Licznik zmienia się tylko w zakładce Śledzenie.
+   projekt: {nazwa, foto, wzory:[...]}
+   wzór:    {id, nazwa, tryb ("plasko"/"okragle"), licznik (numer rzędu), w (oczka),
+             n (po ilu rzędach pokazać koniec, 0 = bez końca), rzedy:[{kom, tekst}]}
+   Każdy wzór ma własny licznik. Licznik zmienia się tylko w zakładce Śledzenie.
    ========================================================= */
 let DB = null, pen = "P", aktWzor = null;
 /* gdy elementu nie ma na stronie, dostajemy pusty zamiennik zamiast błędu */
@@ -191,24 +186,36 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const liczba = (v, min) => Math.max(min, parseInt(v, 10) || min);
 const opcje = (lista, wybrany) => lista.map(x => `<option value="${x.id}"${x.id === wybrany ? " selected":""}>${esc(x.nazwa)}</option>`).join("");
-const pusty = () => ({id:uid(), nazwa:"Nowy wzór", w:16, n:0, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
+const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"plasko", licznik:1, w:16, n:0, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
 
-/* Projekt przykładowy: kardigan Marty z warkoczem */
+/* Projekt przykładowy: kardigan Marty – ten sam warkocz pod różnymi nazwami */
 function dane0(){
   const wiersz1 = [..."LL", ..."PPPP", ..."\\\\\\\\", ..."PPPP", ..."LL"];
   const wiersz2 = [..."LL", ..."////", ..."PPPPPPPP", ..."LL"];
-  const wzor = {id:"w1", nazwa:"Warkocz 4 oczka", w:16, n:0, rzedy:[
-    {kom:wiersz1, tekst:"Krzyżuj 4 środkowe oczka do tyłu."},
-    {kom:wiersz2, tekst:"Krzyżuj 4 pierwsze oczka do przodu."}]};
-  const ob = (nazwa, tryb) => ({id:uid(), nazwa, wzor:"w1", tryb, licznik:1});
+  const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, n:0, rzedy:[
+    {kom:[...wiersz1], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},
+    {kom:[...wiersz2], tekst:"Krzyżuj 4 pierwsze oczka do przodu."}]});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
-    projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne, wzory:[wzor],
-      obszary:[ob("Dół swetra","plasko"), ob("Prawy przód","plasko"), ob("Lewy przód","plasko"),
-               ob("Rękaw pierwszy","okragle"), ob("Rękaw drugi","okragle")]},
+    projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne,
+      wzory:[wzor("Dół swetra","plasko"), wzor("Prawy przód","plasko"), wzor("Lewy przód","plasko"),
+             wzor("Rękaw pierwszy","okragle"), wzor("Rękaw drugi","okragle")]},
     ap:null};
 }
+/* Starsze dane (z obszarami) zamieniamy na osobne wzory z własnym licznikiem */
+function napraw(t){
+  const p = t.projekt;
+  if (p.obszary){
+    const uzyte = new Set(p.obszary.map(o => o.wzor));
+    const kopie = p.obszary.map(o => { const w = p.wzory.find(x => x.id === o.wzor);
+      return w && {...JSON.parse(JSON.stringify(w)), id:uid(), nazwa:o.nazwa, tryb:o.tryb, licznik:o.licznik}; }).filter(Boolean);
+    p.wzory = p.wzory.filter(w => !uzyte.has(w.id)).concat(kopie);
+    delete p.obszary; t.ap = null;
+  }
+  p.wzory.forEach(w => { w.tryb = w.tryb || "plasko"; w.licznik = w.licznik || 1; w.n = w.n || 0; });
+  return t;
+}
 function wczytaj(){
-  try { const t = JSON.parse(localStorage.getItem(USTAWIENIA.klucz) || "null"); if (t && t.v === 3 && t.projekt) return t; } catch(e){}
+  try { const t = JSON.parse(localStorage.getItem(USTAWIENIA.klucz) || "null"); if (t && t.v === 3 && t.projekt) return napraw(t); } catch(e){}
   return dane0();
 }
 function zapisz(){
@@ -216,16 +223,15 @@ function zapisz(){
   catch(e){ alert("Nie udało się zapisać danych w przeglądarce. Zapisz projekt do pliku."); }
 }
 const P = () => DB.projekt;
-const obszar = () => P().obszary.find(o => o.id === DB.ap) || P().obszary[0];
-const wzorDla = o => o && P().wzory.find(w => w.id === o.wzor);
+const aktywny = () => P().wzory.find(w => w.id === DB.ap) || P().wzory[0];   // wzór wybrany w Śledzeniu
 
 /* =========================================================
    LOGIKA ŚLEDZENIA
    Cykl = 2 × liczba rzędów wzoru: rząd wzoru, potem rząd powrotny
    (płasko) albo gładki (na okrągło), i tak w kółko.
    ========================================================= */
-function pozycja(o, licznik){
-  const w = wzorDla(o); if (!w || !w.rzedy.length) return null;
+function pozycja(w, licznik){
+  if (!w || !w.rzedy.length) return null;
   const L = 2 * w.rzedy.length, p = (((licznik - 1) % L) + L) % L;
   return p % 2 === 0 ? {w, r:p / 2} : {w, miedzy:true};
 }
@@ -236,46 +242,40 @@ function wierszWzoru(w, r, now){
   return h + "</div>";
 }
 function rysujSledzenie(){
-  const o = obszar(), p = P();
+  const w = aktywny(), p = P();
   $("pnazwa").textContent = p.nazwa;
-  $("selOb").innerHTML = opcje(p.obszary, o && o.id);
+  $("selOb").innerHTML = opcje(p.wzory, w && w.id);
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
-  if (!o){ $("instr").textContent = "Dodaj obszar w zakładce Projekt."; $("chart").innerHTML = ""; $("big").textContent = "–"; $("koniec").style.display = "none"; return; }
-  $("big").textContent = o.licznik;
-  const teraz = pozycja(o, o.licznik), w = wzorDla(o);
-  $("instr").textContent = !teraz ? "Wybierz wzór dla tego obszaru w zakładce Projekt." :
-    teraz.miedzy ? (o.tryb === "plasko" ? USTAWIENIA.tekstPowrot : USTAWIENIA.tekstGladki) :
-    (teraz.w.rzedy[teraz.r].tekst || "Rząd wzoru " + (teraz.r + 1));
+  if (!w){ $("instr").textContent = "Dodaj wzór w zakładce Projekt."; $("chart").innerHTML = ""; $("big").textContent = "–"; $("koniec").style.display = "none"; return; }
+  $("big").textContent = w.licznik;
+  const teraz = pozycja(w, w.licznik);
+  $("instr").textContent = !teraz ? "Ten wzór nie ma jeszcze rzędów." :
+    teraz.miedzy ? (w.tryb === "plasko" ? USTAWIENIA.tekstPowrot : USTAWIENIA.tekstGladki) :
+    (w.rzedy[teraz.r].tekst || "Rząd wzoru " + (teraz.r + 1));
   /* informacja o końcu wzoru: widoczna tylko na rzędzie równym N, znika po przekroczeniu lub cofnięciu */
-  $("koniec").style.display = (w && w.n > 0 && o.licznik === w.n) ? "block" : "none";
+  $("koniec").style.display = (w.n > 0 && w.licznik === w.n) ? "block" : "none";
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
-    const q = pozycja(o, o.licznik + k); if (!q) break;
-    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${o.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${o.licznik + k}</div>` : wierszWzoru(q.w, q.r, k === 0);
+    const q = pozycja(w, w.licznik + k); if (!q) break;
+    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${w.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${w.licznik + k}</div>` : wierszWzoru(q.w, q.r, k === 0);
   }
   $("chart").innerHTML = h;
 }
-const zmien = d => { const o = obszar(); if (o){ o.licznik = Math.max(1, o.licznik + d); zapisz(); rysujSledzenie(); } };
+const zmien = d => { const w = aktywny(); if (w){ w.licznik = Math.max(1, w.licznik + d); zapisz(); rysujSledzenie(); } };
 
 /* =========================================================
-   ZAKŁADKA PROJEKT: obszary i edytor wzorów
+   ZAKŁADKA PROJEKT: zdjęcie i edytor wzorów
    ========================================================= */
 const wzor = () => P().wzory.find(w => w.id === aktWzor) || P().wzory[0];
 function rysujProjekt(){
   const p = P();
   $("projName").value = p.nazwa;
-  $("obszary").innerHTML = p.obszary.map((o, i) => `<div class="card">
-    <div class="flex"><input data-i="${i}" data-f="nazwa" value="${esc(o.nazwa)}"><button data-del="${i}">Usuń</button></div>
-    <div class="flex">
-      <label>Wzór<select data-i="${i}" data-f="wzor">${opcje(p.wzory, o.wzor)}</select></label>
-      <label>Tryb<select data-i="${i}" data-f="tryb"><option value="plasko"${o.tryb === "plasko" ? " selected":""}>płasko</option><option value="okragle"${o.tryb === "okragle" ? " selected":""}>na okrągło</option></select></label>
-    </div></div>`).join("");
   const w = wzor();
   $("selPat").innerHTML = opcje(p.wzory, w && w.id);
   if (!w){ $("grid").innerHTML = ""; $("rowTexts").innerHTML = ""; $("pal").innerHTML = ""; return; }
   aktWzor = w.id;
-  $("patName").value = w.nazwa; $("patN").value = w.n;
+  $("patName").value = w.nazwa; $("patTryb").value = w.tryb; $("patN").value = w.n;
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
@@ -329,8 +329,8 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 /* Śledzenie */
 $("next").onclick = () => zmien(1);
 $("prev").onclick = () => zmien(-1);
-$("big").onclick = () => { const o = obszar(); if (!o) return;
-  const v = prompt("Numer rzędu:", o.licznik); if (v !== null){ o.licznik = liczba(v, 1); zapisz(); rysujSledzenie(); } };
+$("big").onclick = () => { const w = aktywny(); if (!w) return;
+  const v = prompt("Numer rzędu:", w.licznik); if (v !== null){ w.licznik = liczba(v, 1); zapisz(); rysujSledzenie(); } };
 $("selOb").onchange = e => { DB.ap = e.target.value; zapisz(); rysujSledzenie(); };
 $("foto").onerror = () => $("foto").style.display = "none";
 
@@ -339,20 +339,19 @@ $("projName").onchange = e => { P().nazwa = e.target.value || "Projekt"; zapisz(
 $("photoIn").onchange = e => { if (e.target.files[0]) wczytajFoto(e.target.files[0]); };
 $("projNew").onclick = () => {
   if (!confirm("Zacząć nowy, pusty projekt? Bieżący zostanie zastąpiony – zapisz go wcześniej w Ustawieniach.")) return;
-  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()], obszary:[]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
 };
-/* Projekt: obszary */
-$("obNew").onclick = () => { P().obszary.push({id:uid(), nazwa:"Nowy obszar", wzor:(P().wzory[0] || {}).id || "", tryb:"plasko", licznik:1}); zapisz(); wszystko(); };
-$("obszary").onchange = e => { const d = e.target.dataset, o = P().obszary[+d.i]; if (o){ o[d.f] = e.target.value; zapisz(); wszystko(); } };
-$("obszary").onclick = e => { if (e.target.dataset.del !== undefined && confirm("Usunąć ten obszar razem z jego licznikiem?")){ P().obszary.splice(+e.target.dataset.del, 1); zapisz(); wszystko(); } };
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
 $("patN").onchange = e => { wzor().n = liczba(e.target.value, 0); zapisz(); rysujSledzenie(); };
+$("patTryb").onchange = e => { wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
 $("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
-$("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór? Obszary, które go używają, stracą wzór.")) return;
-  P().wzory = P().wzory.filter(x => x.id !== w.id); P().obszary.forEach(o => { if (o.wzor === w.id) o.wzor = (P().wzory[0] || {}).id || ""; });
-  aktWzor = null; zapisz(); wszystko(); };
+$("patDup").onclick = () => { const w = wzor(); if (!w) return;
+  const k = {...JSON.parse(JSON.stringify(w)), id:uid(), nazwa:w.nazwa + " (kopia)", licznik:1};
+  P().wzory.push(k); aktWzor = k.id; zapisz(); wszystko(); };
+$("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór „" + w.nazwa + "” razem z jego licznikiem?")) return;
+  P().wzory = P().wzory.filter(x => x.id !== w.id); aktWzor = null; zapisz(); wszystko(); };
 $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmienRozmiar(1, 0);
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
 $("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
@@ -400,7 +399,7 @@ $("imp").onchange = e => {
     const t = JSON.parse(fr.result);
     if (t.v !== 3 || !t.projekt || !t.symbole) throw 0;
     if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){
-      DB = t; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+      DB = napraw(t); DB.ap = null; aktWzor = null; zapisz(); wszystko();
     }
   } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); } e.target.value = ""; };
   fr.readAsText(f);
