@@ -70,6 +70,7 @@ button:active{transform:scale(.97)}
 .pal button.on{background:var(--brown);color:var(--on-brown)}
 #grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
 #grid label{margin-top:8px}
+.ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .ci{font-size:13px;color:var(--brown);font-weight:600;margin:6px 0 2px}
 .hint{color:var(--sub);font-size:14px}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
@@ -119,6 +120,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="flex"><select id="selPat"></select></div>
       <div class="flex"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel">Usuń wzór</button></div>
       <div class="flex"><input id="patName" placeholder="Nazwa wzoru"><select id="patTryb"><option value="plasko">płasko</option><option value="okragle">na okrągło</option></select></div>
+      <div class="ostrz" id="uzycie"></div>
       <div class="flex">
         <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
         <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
@@ -269,6 +271,14 @@ const zmien = d => { const w = aktywny(); if (w){ w.licznik = Math.max(1, w.licz
    ZAKŁADKA PROJEKT: zdjęcie i edytor wzorów
    ========================================================= */
 const wzor = () => P().wzory.find(w => w.id === aktWzor) || P().wzory[0];
+/* Wzór z licznikiem większym niż 1 jest w użyciu – przed zmianą pytamy (raz dla wzoru, do odświeżenia strony) */
+const zgoda = {};
+function mozna(w){
+  if (!w) return false;
+  if (w.licznik <= 1 || zgoda[w.id]) return true;
+  if (confirm("Ten wzór jest już w użyciu (licznik: " + w.licznik + "). Zmiana może zepsuć pracę: zrobione rzędy wyglądały inaczej. Jeśli chcesz tylko spróbować, użyj Duplikuj wzór. Zmienić mimo to?")){ zgoda[w.id] = true; return true; }
+  return false;
+}
 function rysujProjekt(){
   const p = P();
   $("projName").value = p.nazwa;
@@ -277,6 +287,8 @@ function rysujProjekt(){
   if (!w){ $("grid").innerHTML = ""; $("pal").innerHTML = ""; return; }
   aktWzor = w.id;
   $("patName").value = w.nazwa; $("patTryb").value = w.tryb;
+  $("uzycie").style.display = w.licznik > 1 ? "block" : "none";
+  $("uzycie").textContent = "⚠ Ten wzór jest w użyciu (licznik: " + w.licznik + "). Zmiany mogą zepsuć pracę – do prób użyj Duplikuj wzór.";
   $("patBK").checked = w.n === 0; $("patN").disabled = w.n === 0; $("patN").value = w.n || "";
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
@@ -301,7 +313,7 @@ function maluj(el){
   const w = wzor(); w.rzedy[+el.dataset.r].kom[+el.dataset.c] = pen; el.textContent = pen;
 }
 function zmienRozmiar(dw, dh){
-  const w = wzor(); if (!w) return;
+  const w = wzor(); if (!w || !mozna(w)) return;
   w.w = Math.min(USTAWIENIA.maxOczek, Math.max(1, w.w + dw));
   const h = Math.min(USTAWIENIA.maxRzedow, Math.max(1, w.rzedy.length + dh));
   while (w.rzedy.length < h) w.rzedy.push({kom:[], tekst:""});
@@ -351,7 +363,7 @@ $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
 $("patN").onchange = e => { wzor().n = liczba(e.target.value, 1); zapisz(); rysujSledzenie(); };
 $("patBK").onchange = e => { const w = wzor(); w.n = e.target.checked ? 0 : 2 * w.rzedy.length; zapisz(); rysujProjekt(); rysujSledzenie(); };
-$("patTryb").onchange = e => { wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
+$("patTryb").onchange = e => { if (!mozna(wzor())){ rysujProjekt(); return; } wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
 $("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
 $("patDup").onclick = () => { const w = wzor(); if (!w) return;
   const k = {...JSON.parse(JSON.stringify(w)), id:uid(), nazwa:w.nazwa + " (kopia)", licznik:1};
@@ -362,8 +374,8 @@ $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmie
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
 $("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
 let maluje = false;
-$("grid").addEventListener("pointerdown", e => { maluje = e.target.dataset.r !== undefined; if (maluje) maluj(e.target); });
-$("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t !== undefined){ wzor().rzedy[+t].tekst = e.target.value; zapisz(); } });
+$("grid").addEventListener("pointerdown", e => { maluje = e.target.dataset.r !== undefined && mozna(wzor()); if (maluje) maluj(e.target); });
+$("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t === undefined) return; if (!mozna(wzor())){ rysujProjekt(); return; } wzor().rzedy[+t].tekst = e.target.value; zapisz(); });
 $("grid").addEventListener("pointermove", e => { if (maluje) maluj(document.elementFromPoint(e.clientX, e.clientY)); });
 window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); rysujSledzenie(); } });
 /* Ustawienia: słownik symboli */
