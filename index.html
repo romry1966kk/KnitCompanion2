@@ -68,7 +68,9 @@ button:active{transform:scale(.97)}
 .flex>input{flex:1}
 .pal button{min-width:44px;font-size:18px;font-weight:700}
 .pal button.on{background:var(--brown);color:var(--on-brown)}
-#grid{touch-action:none;user-select:none;-webkit-user-select:none}
+#grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
+#grid label{margin-top:8px}
+.ci{font-size:13px;color:var(--brown);font-weight:600;margin:6px 0 2px}
 .hint{color:var(--sub);font-size:14px}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
 footer{text-align:center;color:var(--sub);font-size:14px}
@@ -109,7 +111,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 2: PROJEKT (zdjęcie i wzory – każdy wzór ma własny licznik i tryb) ===== -->
   <section id="proj">
-    <div class="flex"><input id="projName" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button></div>
+    <div class="flex"><input id="projName" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button><button id="projDel">Usuń projekt</button></div>
     <label>Zdjęcie projektu (opcjonalne)<input type="file" id="photoIn" accept="image/*"></label>
 
     <div class="card">
@@ -121,11 +123,10 @@ footer{text-align:center;color:var(--sub);font-size:14px}
         <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
         <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
       </div>
-      <label>Ilość rzędów, po której pokazać koniec wzoru (0 = bez końca)<input type="number" min="0" id="patN"></label>
+      <div class="flex"><label>Pokaż koniec wzoru na rzędzie licznika nr<input type="number" min="1" id="patN"></label><label style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="patBK" style="width:22px;height:22px;padding:0"> bez końca</label></div>
       <div class="flex pal" id="pal"></div>
       <div id="grid"></div>
-      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Wpisuj tylko rzędy po prawej stronie – rzędy powrotne program doda sam.</div>
-      <div id="rowTexts" class="card"></div>
+      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Wpisuj tylko rzędy po prawej stronie – rzędy powrotne program doda sam. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
     </div>
   </section>
 
@@ -197,8 +198,8 @@ function dane0(){
     {kom:[...wiersz2], tekst:"Krzyżuj 4 pierwsze oczka do przodu."}]});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
     projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne,
-      wzory:[wzor("Dół swetra","plasko"), wzor("Prawy przód","plasko"), wzor("Lewy przód","plasko"),
-             wzor("Rękaw pierwszy","okragle"), wzor("Rękaw drugi","okragle")]},
+      wzory:[wzor("Warkocz - dół swetra","plasko"), wzor("Warkocz - prawy przód","plasko"), wzor("Warkocz - lewy przód","plasko"),
+             wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
     ap:null};
 }
 /* Starsze dane (z obszarami) zamieniamy na osobne wzory z własnym licznikiem */
@@ -258,7 +259,7 @@ function rysujSledzenie(){
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
     const q = pozycja(w, w.licznik + k); if (!q) break;
-    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${w.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${w.licznik + k}</div>` : wierszWzoru(q.w, q.r, k === 0);
+    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${w.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${w.licznik + k}</div>` : (q.w.rzedy[q.r].tekst ? `<div class="ci">${esc(q.w.rzedy[q.r].tekst)}</div>` : "") + wierszWzoru(q.w, q.r, k === 0);
   }
   $("chart").innerHTML = h;
 }
@@ -273,21 +274,21 @@ function rysujProjekt(){
   $("projName").value = p.nazwa;
   const w = wzor();
   $("selPat").innerHTML = opcje(p.wzory, w && w.id);
-  if (!w){ $("grid").innerHTML = ""; $("rowTexts").innerHTML = ""; $("pal").innerHTML = ""; return; }
+  if (!w){ $("grid").innerHTML = ""; $("pal").innerHTML = ""; return; }
   aktWzor = w.id;
-  $("patName").value = w.nazwa; $("patTryb").value = w.tryb; $("patN").value = w.n;
+  $("patName").value = w.nazwa; $("patTryb").value = w.tryb;
+  $("patBK").checked = w.n === 0; $("patN").disabled = w.n === 0; $("patN").value = w.n || "";
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
   let g = "";
   w.rzedy.forEach((r, i) => {
+    g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"></label>`;
     g += `<div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
     for (let c = 0; c < w.w; c++) g += `<div class="c" data-r="${i}" data-c="${c}">${esc(r.kom[c] || "")}</div>`;
     g += "</div>";
   });
   $("grid").innerHTML = g;
-  $("rowTexts").innerHTML = "<b>Instrukcje rzędów</b>" + w.rzedy.map((r, i) =>
-    `<label>Rząd ${i + 1}<input data-t="${i}" value="${esc(r.tekst)}"></label>`).join("");
 }
 function rysujUstawienia(){
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
@@ -341,10 +342,15 @@ $("projNew").onclick = () => {
   if (!confirm("Zacząć nowy, pusty projekt? Bieżący zostanie zastąpiony – zapisz go wcześniej w Ustawieniach.")) return;
   DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
 };
+$("projDel").onclick = () => {
+  if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje.")) return;
+  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+};
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
-$("patN").onchange = e => { wzor().n = liczba(e.target.value, 0); zapisz(); rysujSledzenie(); };
+$("patN").onchange = e => { wzor().n = liczba(e.target.value, 1); zapisz(); rysujSledzenie(); };
+$("patBK").onchange = e => { const w = wzor(); w.n = e.target.checked ? 0 : 2 * w.rzedy.length; zapisz(); rysujProjekt(); rysujSledzenie(); };
 $("patTryb").onchange = e => { wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
 $("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
 $("patDup").onclick = () => { const w = wzor(); if (!w) return;
@@ -356,10 +362,10 @@ $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmie
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
 $("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
 let maluje = false;
-$("grid").addEventListener("pointerdown", e => { maluje = true; maluj(e.target); });
+$("grid").addEventListener("pointerdown", e => { maluje = e.target.dataset.r !== undefined; if (maluje) maluj(e.target); });
+$("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t !== undefined){ wzor().rzedy[+t].tekst = e.target.value; zapisz(); } });
 $("grid").addEventListener("pointermove", e => { if (maluje) maluj(document.elementFromPoint(e.clientX, e.clientY)); });
 window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); rysujSledzenie(); } });
-$("rowTexts").onchange = e => { wzor().rzedy[+e.target.dataset.t].tekst = e.target.value; zapisz(); };
 /* Ustawienia: słownik symboli */
 $("symTab").onchange = e => { const d = e.target.dataset; if (d.sy !== undefined){ DB.symbole[+d.sy][d.f] = e.target.value; zapisz(); wszystko(); } };
 $("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ DB.symbole.splice(+e.target.dataset.symdel, 1); zapisz(); wszystko(); } };
