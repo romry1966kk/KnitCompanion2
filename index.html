@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Knit Companion">
 <title>Knit Companion v 2.0</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2258%22 r=%2234%22 fill=%22%233d7fc4%22/%3E%3Cpath d=%22M20 48Q50 70 82 46M17 62Q50 84 84 60M30 30Q54 48 76 34M42 25Q62 40 80 54%22 fill=%22none%22 stroke=%22%238bbbea%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M76 86Q92 90 94 74%22 fill=%22none%22 stroke=%22%233d7fc4%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3Cg stroke-linecap=%22round%22%3E%3Cpath d=%22M22 8L56 68M78 8L44 68%22 stroke=%22%238a5a36%22 stroke-width=%227%22/%3E%3Cpath d=%22M22 8L56 68M78 8L44 68%22 stroke=%22%23f1e2c0%22 stroke-width=%223.5%22/%3E%3C/g%3E%3Ccircle cx=%2222%22 cy=%228%22 r=%225%22 fill=%22%238a5a36%22/%3E%3Ccircle cx=%2278%22 cy=%228%22 r=%225%22 fill=%22%238a5a36%22/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2258%22 r=%2234%22 fill=%22%23cf3a2f%22/%3E%3Cpath d=%22M20 48Q50 70 82 46M17 62Q50 84 84 60M30 30Q54 48 76 34M42 25Q62 40 80 54%22 fill=%22none%22 stroke=%22%23f59a8c%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M76 86Q92 90 94 74%22 fill=%22none%22 stroke=%22%23cf3a2f%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3Cg stroke-linecap=%22round%22%3E%3Cpath d=%22M22 8L56 68M78 8L44 68%22 stroke=%22%238a5a36%22 stroke-width=%227%22/%3E%3Cpath d=%22M22 8L56 68M78 8L44 68%22 stroke=%22%23f1e2c0%22 stroke-width=%223.5%22/%3E%3C/g%3E%3Ccircle cx=%2222%22 cy=%228%22 r=%225%22 fill=%22%238a5a36%22/%3E%3Ccircle cx=%2278%22 cy=%228%22 r=%225%22 fill=%22%238a5a36%22/%3E%3C/svg%3E">
 <style>
 /* ===== KOLORY (jasny i ciemny tryb) ===== */
 :root{
@@ -54,8 +54,6 @@ button:active{transform:scale(.97)}
 .pattern{display:flex;flex-direction:column;gap:10px}
 .instr{background:var(--card);color:var(--brown);border-radius:12px;padding:12px;text-align:center;
   font-size:18px;font-weight:600;min-height:3.2em;display:flex;align-items:center;justify-content:center}
-.koniec{display:none;background:var(--brown);color:var(--on-brown);border-radius:12px;padding:12px;
-  text-align:center;font-size:18px;font-weight:700}
 .crow{display:grid;gap:1px;margin-bottom:1px}
 .c{aspect-ratio:1/.85;display:flex;align-items:center;justify-content:center;background:var(--cell);
   border:1px solid var(--line);font-size:clamp(9px,1.6vw,13px);font-weight:600;overflow:hidden}
@@ -71,8 +69,13 @@ button:active{transform:scale(.97)}
 .pal button.on{background:var(--brown);color:var(--on-brown)}
 #grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
 #grid label{margin-top:8px}
+.trow{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:4px}
+.ik{color:var(--brown);display:flex;justify-content:center}
+.ik[data-bk]{cursor:pointer}
+.ikbtn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--sub);border-color:var(--line)}
+.ikbtn.on{color:var(--brown);border-color:var(--brown);background:var(--card)}
+.ikbtn svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
-.ci{font-size:13px;color:var(--brown);font-weight:600;margin:6px 0 2px}
 .hint{color:var(--sub);font-size:14px}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
 footer{text-align:center;color:var(--sub);font-size:14px}
@@ -82,7 +85,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 <main>
   <header>
     <span id="offline">OFFLINE</span>
-    <h1><svg class="ikona" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="58" r="34" fill="#3d7fc4"/><path d="M20 48Q50 70 82 46M17 62Q50 84 84 60M30 30Q54 48 76 34M42 25Q62 40 80 54" fill="none" stroke="#8bbbea" stroke-width="3" stroke-linecap="round"/><path d="M76 86Q92 90 94 74" fill="none" stroke="#3d7fc4" stroke-width="5" stroke-linecap="round"/><g stroke-linecap="round"><path d="M22 8L56 68M78 8L44 68" stroke="#8a5a36" stroke-width="7"/><path d="M22 8L56 68M78 8L44 68" stroke="#f1e2c0" stroke-width="3.5"/></g><circle cx="22" cy="8" r="5" fill="#8a5a36"/><circle cx="78" cy="8" r="5" fill="#8a5a36"/></svg> <span id="tytul"></span></h1>
+    <h1><svg class="ikona" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="58" r="34" fill="#cf3a2f"/><path d="M20 48Q50 70 82 46M17 62Q50 84 84 60M30 30Q54 48 76 34M42 25Q62 40 80 54" fill="none" stroke="#f59a8c" stroke-width="3" stroke-linecap="round"/><path d="M76 86Q92 90 94 74" fill="none" stroke="#cf3a2f" stroke-width="5" stroke-linecap="round"/><g stroke-linecap="round"><path d="M22 8L56 68M78 8L44 68" stroke="#8a5a36" stroke-width="7"/><path d="M22 8L56 68M78 8L44 68" stroke="#f1e2c0" stroke-width="3.5"/></g><circle cx="22" cy="8" r="5" fill="#8a5a36"/><circle cx="78" cy="8" r="5" fill="#8a5a36"/></svg> <span id="tytul"></span></h1>
   </header>
 
   <nav>
@@ -93,14 +96,14 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
-    <select id="selOb" aria-label="Wzór"></select>
+    <div class="flex"><select id="selOb" aria-label="Wzór" style="flex:1"></select><button id="bkSel" class="ikbtn" title="Wzór bez końca"></button></div>
     <div class="hint" id="pnazwa"></div>
     <div class="row2">
       <img class="photo" id="foto" alt="Zdjęcie projektu">
       <div class="pattern">
-        <div class="koniec" id="koniec">Koniec wzoru – możesz skończyć albo iść dalej.</div>
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
+        <div class="hint" id="legenda" style="text-align:center"></div>
       </div>
     </div>
     <div class="counter">
@@ -125,11 +128,11 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="flex">
         <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
         <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
+        <button id="patBK" class="ikbtn" style="margin-left:auto;width:auto;padding:0 12px;gap:6px" title="Wzór bez końca"></button>
       </div>
-      <div class="flex"><label>Pokaż koniec wzoru na rzędzie licznika nr<input type="number" min="1" id="patN"></label><label style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="patBK" style="width:22px;height:22px;padding:0"> bez końca</label></div>
       <div class="flex pal" id="pal"></div>
       <div id="grid"></div>
-      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Wpisuj tylko rzędy po prawej stronie – rzędy powrotne program doda sam. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
+      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Rysuj wszystkie rzędy, także powrotne. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
     </div>
   </section>
 
@@ -157,7 +160,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".4",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".5",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -165,8 +168,6 @@ const USTAWIENIA = {
   maxRzedow: 60,                        // największa liczba rzędów wzoru
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
   fotoDomyslne: "img/domyslne.jpg",     // zdjęcie przykładowego projektu
-  tekstPowrot: "Powrót: przerabiaj oczka tak, jak schodzą z drutu.",
-  tekstGladki: "Rząd gładki: przerabiaj oczka tak, jak je widzisz.",
   /* Domyślny słownik symboli (symbol = znak w komórce) */
   symbole: [
     {s:"P",  n:"prawe"},
@@ -180,7 +181,8 @@ const USTAWIENIA = {
    DANE – w przeglądarce jest jeden projekt (cały sweter)
    projekt: {nazwa, foto, wzory:[...]}
    wzór:    {id, nazwa, tryb ("plasko"/"okragle"), licznik (numer rzędu), w (oczka),
-             n (po ilu rzędach pokazać koniec, 0 = bez końca), rzedy:[{kom, tekst}]}
+             bk (true = wzór bez końca),
+             rzedy:[{kom, tekst}] – wszystkie rzędy, także powrotne}
    Każdy wzór ma własny licznik. Licznik zmienia się tylko w zakładce Śledzenie.
    ========================================================= */
 let DB = null, pen = "P", aktWzor = null;
@@ -190,19 +192,33 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const liczba = (v, min) => Math.max(min, parseInt(v, 10) || min);
 const opcje = (lista, wybrany) => lista.map(x => `<option value="${x.id}"${x.id === wybrany ? " selected":""}>${esc(x.nazwa)}</option>`).join("");
-const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"plasko", licznik:1, w:16, n:0, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
+const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"plasko", licznik:1, w:16, bk:true, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
+
+/* Ikony (rysowane w programie, kolor bierze się z koloru tekstu) */
+const sv = d => '<svg viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
+const IK = {
+  norm:    sv('<path d="M4 12h15M13 6l6 6-6 6"/>'),
+  powrot:  sv('<path d="M9 5L4 10l5 5"/><path d="M4 10h10a6 6 0 0 1 0 12h-3"/>'),
+  okr:     sv('<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>'),
+  bk:      sv('<path d="M8 20V5M4 9l4-4 4 4"/><path d="M16 4v15M12 15l4 4 4-4"/>')
+};
 
 /* Projekt przykładowy: kardigan Marty – ten sam warkocz pod różnymi nazwami */
 function dane0(){
-  const wiersz1 = [..."LL", ..."PPPP", ..."\\\\\\\\", ..."PPPP", ..."LL"];
-  const wiersz2 = [..."LL", ..."////", ..."PPPPPPPP", ..."LL"];
-  const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, n:0, rzedy:[
-    {kom:[...wiersz1], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},
-    {kom:[...wiersz2], tekst:"Krzyżuj 4 pierwsze oczka do przodu."}]});
+  const T1 = "Powrót: przerabiaj oczka tak, jak schodzą z drutu.";
+  const T2 = "Rząd gładki: przerabiaj oczka tak, jak je widzisz.";
+  const wr = (znaki, tekst) => ({kom:[...znaki], tekst});
+  const uk = "\\".repeat(4), pp = "PPLLLLLLLLLLLLPP";
+  const plasko = nazwa => ({id:uid(), nazwa, tryb:"plasko", licznik:1, w:16, bk:true, rzedy:[
+    wr("LLPPPP" + uk + "PPPPLL", "Krzyżuj 4 środkowe oczka do tyłu."), wr(pp, T1),
+    wr("LL////PPPPPPPPLL", "Krzyżuj 4 pierwsze oczka do przodu."), wr(pp, T1)]});
+  const okragle = nazwa => ({id:uid(), nazwa, tryb:"okragle", licznik:1, w:16, bk:true, rzedy:[
+    wr("PP////PPPPPPPPPP", "Krzyżuj 4 pierwsze oczka do przodu."), wr("P".repeat(16), T2),
+    wr("PPPPPP" + uk + "PPPPPP", "Krzyżuj 4 środkowe oczka do tyłu."), wr("P".repeat(16), T2)]});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
     projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne,
-      wzory:[wzor("Warkocz - dół swetra","plasko"), wzor("Warkocz - prawy przód","plasko"), wzor("Warkocz - lewy przód","plasko"),
-             wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
+      wzory:[plasko("Warkocz - dół swetra"), plasko("Warkocz - prawy przód"), plasko("Warkocz - lewy przód"),
+             okragle("Warkocz - rękaw pierwszy"), okragle("Warkocz - rękaw drugi")]},
     ap:null};
 }
 /* Starsze dane (z obszarami) zamieniamy na osobne wzory z własnym licznikiem */
@@ -215,7 +231,7 @@ function napraw(t){
     p.wzory = p.wzory.filter(w => !uzyte.has(w.id)).concat(kopie);
     delete p.obszary; t.ap = null;
   }
-  p.wzory.forEach(w => { w.tryb = w.tryb || "plasko"; w.licznik = w.licznik || 1; w.n = w.n || 0; });
+  p.wzory.forEach(w => { w.tryb = w.tryb || "plasko"; w.licznik = w.licznik || 1; if (w.bk === undefined) w.bk = !(w.n > 0); delete w.n; });
   return t;
 }
 function wczytaj(){
@@ -234,37 +250,42 @@ const aktywny = () => P().wzory.find(w => w.id === DB.ap) || P().wzory[0];   // 
    Cykl = 2 × liczba rzędów wzoru: rząd wzoru, potem rząd powrotny
    (płasko) albo gładki (na okrągło), i tak w kółko.
    ========================================================= */
-function pozycja(w, licznik){
-  if (!w || !w.rzedy.length) return null;
-  const L = 2 * w.rzedy.length, p = (((licznik - 1) % L) + L) % L;
-  return p % 2 === 0 ? {w, r:p / 2} : {w, miedzy:true};
-}
+/* Ikona aktywnego rzędu: na okrągło, albo płasko (rzędy nieparzyste = normalny, parzyste = powrót) */
+const ikonaRzedu = (w, r) => w.tryb === "okragle" ? IK.okr : (r % 2 === 0 ? IK.norm : IK.powrot);
 function wierszWzoru(w, r, now){
-  const cells = w.rzedy[r].kom;
+  const cells = r === null ? [] : w.rzedy[r].kom;
   let h = `<div class="crow${now ? " now":""}" style="grid-template-columns:repeat(${w.w},1fr)">`;
   for (let i = 0; i < w.w; i++) h += `<div class="c">${esc(cells[i] || "")}</div>`;
   return h + "</div>";
 }
+const trow = (ikona, html, bk) => `<div class="trow"><div class="ik"${bk ? " data-bk":""}>${ikona}</div>${html}</div>`;
 function rysujSledzenie(){
   const w = aktywny(), p = P();
   $("pnazwa").textContent = p.nazwa;
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
+  $("bkSel").className = "ikbtn" + (w && w.bk ? " on" : "");
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
-  if (!w){ $("instr").textContent = "Dodaj wzór w zakładce Projekt."; $("chart").innerHTML = ""; $("big").textContent = "–"; $("koniec").style.display = "none"; return; }
+  if (!w || !w.rzedy.length){
+    $("instr").textContent = w ? "Ten wzór nie ma jeszcze rzędów." : "Dodaj wzór w zakładce Projekt.";
+    $("chart").innerHTML = ""; $("legenda").textContent = ""; $("big").textContent = w ? w.licznik : "–"; return;
+  }
+  const R = w.rzedy.length, i0 = w.licznik - 1, koniec = !w.bk && i0 >= R;
   $("big").textContent = w.licznik;
-  const teraz = pozycja(w, w.licznik);
-  $("instr").textContent = !teraz ? "Ten wzór nie ma jeszcze rzędów." :
-    teraz.miedzy ? (w.tryb === "plasko" ? USTAWIENIA.tekstPowrot : USTAWIENIA.tekstGladki) :
-    (w.rzedy[teraz.r].tekst || "Rząd wzoru " + (teraz.r + 1));
-  /* informacja o końcu wzoru: widoczna tylko na rzędzie równym N, znika po przekroczeniu lub cofnięciu */
-  $("koniec").style.display = (w.n > 0 && w.licznik === w.n) ? "block" : "none";
+  /* panel informacyjny: instrukcja aktywnego rzędu z zakładki Projekt albo informacja o końcu wzoru */
+  $("instr").textContent = koniec ? "Koniec wzoru. Aby kontynuować, kliknij ikonę „bez końca” po lewej stronie tabeli."
+    : w.rzedy[w.bk ? i0 % R : i0].tekst;
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
-    const q = pozycja(w, w.licznik + k); if (!q) break;
-    h += q.miedzy ? `<div class="between${k === 0 ? " now":""}">${w.tryb === "plasko" ? "powrót" : "gładki"} · rząd ${w.licznik + k}</div>` : (q.w.rzedy[q.r].tekst ? `<div class="ci">${esc(q.w.rzedy[q.r].tekst)}</div>` : "") + wierszWzoru(q.w, q.r, k === 0);
+    const i = i0 + k;
+    if (!w.bk && i >= R){ h += trow(IK.bk, wierszWzoru(w, null, k === 0), true); break; }   // wiersz „po ostatnim” z ikoną
+    const r = w.bk ? i % R : i;
+    h += trow(k === 0 ? ikonaRzedu(w, r) : "", wierszWzoru(w, r, k === 0), false);
   }
   $("chart").innerHTML = h;
+  /* legenda tylko dla symboli użytych w tym wzorze */
+  const uzyte = [...new Set(w.rzedy.flatMap(r => r.kom).filter(Boolean))];
+  $("legenda").textContent = uzyte.map(z => { const s = DB.symbole.find(x => x.s === z); return z + (s ? " = " + s.n : ""); }).join(" · ");
 }
 const zmien = d => { const w = aktywny(); if (w){ w.licznik = Math.max(1, w.licznik + d); zapisz(); rysujSledzenie(); } };
 
@@ -290,7 +311,7 @@ function rysujProjekt(){
   $("patName").value = w.nazwa; $("patTryb").value = w.tryb;
   $("uzycie").style.display = w.licznik > 1 ? "block" : "none";
   $("uzycie").textContent = "⚠ Ten wzór jest w użyciu (licznik: " + w.licznik + "). Zmiany mogą zepsuć pracę – do prób użyj Duplikuj wzór.";
-  $("patBK").checked = w.n === 0; $("patN").disabled = w.n === 0; $("patN").value = w.n || "";
+  $("patBK").className = "ikbtn" + (w.bk ? " on" : "");
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
@@ -362,8 +383,9 @@ $("projDel").onclick = () => {
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
-$("patN").onchange = e => { wzor().n = liczba(e.target.value, 1); zapisz(); rysujSledzenie(); };
-$("patBK").onchange = e => { const w = wzor(); w.n = e.target.checked ? 0 : 2 * w.rzedy.length; zapisz(); rysujProjekt(); rysujSledzenie(); };
+$("patBK").onclick = () => { const w = wzor(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
+$("bkSel").onclick = () => { const w = aktywny(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
+$("chart").onclick = e => { if (e.target.closest("[data-bk]")){ const w = aktywny(); if (w){ w.bk = true; zapisz(); wszystko(); } } };
 $("patTryb").onchange = e => { if (!mozna(wzor())){ rysujProjekt(); return; } wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
 $("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
 $("patDup").onclick = () => { const w = wzor(); if (!w) return;
@@ -432,6 +454,7 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
 $("stopka").textContent = USTAWIENIA.tytul + USTAWIENIA.wersja + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
+$("bkSel").innerHTML = IK.bk; $("patBK").innerHTML = IK.bk + " bez końca";
 DB = wczytaj(); stanSieci(); wszystko();
 </script>
 </body>
