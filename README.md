@@ -1,62 +1,91 @@
-# Knit Companion v 2.0 (C)2026
+# Knit Companion v 2.0
 
-Autor: Marta Matulewicz
+© 2026 Marta Matulewicz
 
-Program do pracy nad detalami na drutach: przechowuje wzory (np. warkocz, kwiatek) i pomaga śledzić, w którym rzędzie jesteś i co robić dalej. Działa w przeglądarce na iPadzie, iPhonie i Macu. Cały program to jeden plik `index.html`.
+Program do śledzenia postępu robótki na drutach. Przechowuje wzory (np. warkocz, kwiatek), a podczas dziergania pokazuje, w którym rzędzie jesteś i co robić dalej. Działa w przeglądarce na iPadzie, iPhonie i Macu. Cały program to jeden plik `index.html`.
 
 ## Adres programu
 
 https://romry1966kk.github.io/KnitCompanion2/
 
-Adres musi pozostać stały. Dane zapisują się w przeglądarce i są przypisane do adresu, więc po jego zmianie program będzie pusty (patrz „Kopia zapasowa”).
+Adres musi pozostać stały. Dane zapisują się w przeglądarce i są przypisane do adresu, więc po jego zmianie program będzie pusty (patrz „Zapis i kopia zapasowa”).
 
 ## Jak korzystać
 
-Program ma trzy zakładki:
+Program ma trzy zakładki.
 
-- **Śledzenie**: wybierasz pracę i miejsce użycia wzoru (np. Prawy przód). Program pokazuje bieżący rząd, instrukcję i kilka następnych rzędów. Po wykonaniu rzędu naciskasz „Ukończyłam rząd”. „Cofnij rząd” wraca o jeden.
-- **Wzory**: tworzysz wzór jako siatkę symboli (malowanie palcem lub myszką), wpisujesz instrukcje do rzędów i edytujesz słownik symboli. Wpisuj tylko rzędy po prawej stronie, rzędy powrotne program dodaje sam.
-- **Prace**: tworzysz prace, dodajesz zdjęcie i miejsca użycia wzoru. Dla każdego miejsca ustawiasz wzór, tryb (płasko lub na okrągło), rząd, w którym wzór się zaczyna, rząd wzoru, od którego zaczynasz, oraz aktualny rząd. Tu jest też kopia zapasowa.
+### Śledzenie
 
-Czerwona plakietka **OFFLINE** pokazuje, że urządzenie nie ma połączenia z internetem.
+- Z listy wybierasz **wzór** (np. „Warkocz - prawy przód”).
+- Widzisz zdjęcie projektu, instrukcję bieżącego rzędu i podgląd kilku następnych rzędów. Nad każdym rzędem podglądu jest instrukcja wpisana w zakładce Projekt.
+- **Duży numer** to licznik rzędu tego wzoru. Przyciski **Ukończyłam rząd** i **Cofnij rząd** zmieniają go o jeden. Dotknięcie numeru pozwala wpisać dowolny rząd.
+- Na rzędzie, który kończy wzór (jeśli wzór ma koniec), pojawia się pasek „Koniec wzoru”. Znika po przekroczeniu rzędu lub po cofnięciu licznika. Niczego nie blokuje.
+- Rzędy wzoru i rzędy powrotne następują na zmianę: nieparzyste numery licznika to rzędy wzoru, parzyste to rzędy powrotne (przy robótce płaskiej) albo gładkie (na okrągło).
+
+### Projekt
+
+- **Nazwa** projektu, przyciski **Nowy projekt** i **Usuń projekt** oraz opcjonalne **zdjęcie**.
+- **Wzory** projektu: **Nowy wzór**, **Duplikuj wzór** i **Usuń wzór**. Każdy wzór ma własny licznik, własną nazwę i tryb (płasko lub na okrągło). Ten sam wzór możesz zduplikować i nazwać inaczej (np. dla prawego i lewego przodu).
+- **Edytor wzoru:** ustawiasz liczbę oczek i rzędów, wybierasz symbol z palety i malujesz palcem lub myszką. Rząd 1 jest u góry. Wpisujesz tylko rzędy po prawej stronie, rzędy powrotne program dodaje sam.
+- **Instrukcje:** nad każdym rzędem tabelki jest pole na instrukcję. Pojawi się w Śledzeniu.
+- **Koniec wzoru:** zaznaczone „bez końca” oznacza wzór powtarzany bez końca. Odznaczone pozwala wpisać numer rzędu licznika, na którym pokazać pasek końca. Licznik liczy też rzędy powrotne, więc pełny wzór ma 2 × liczba rzędów.
+- **Ostrzeżenie:** wzór z licznikiem większym niż 1 jest „w użyciu”. Zmiana takiego wzoru może zepsuć pracę, więc program pokazuje pasek ostrzeżenia i pyta przed zmianą. Do prób użyj **Duplikuj wzór**.
+
+### Ustawienia
+
+- **Zapisz w Plikach**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina.
+- **Wczytaj z pliku**: wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie.
+- **Słownik symboli**: znak, nazwa i opis każdego symbolu dostępnego w palecie. Słownik zapisuje się razem z projektem. Zmiana samego znaku zmienia sens narysowanych wzorów.
+
+Czerwona plakietka **OFFLINE** informuje, że urządzenie nie ma połączenia z internetem. Pełna praca bez internetu nie jest jeszcze gwarantowana.
 
 ## Gdzie są zapisane dane
 
-Wszystkie wzory, prace i zdjęcia zapisują się **w przeglądarce na danym urządzeniu**. Nie są wysyłane na żaden serwer. Oznacza to, że:
+Wszystkie wzory, projekt i zdjęcie zapisują się **w przeglądarce na danym urządzeniu**. Nie są wysyłane na żaden serwer. Oznacza to, że:
 
 - iPad, iPhone i Mac mają osobne dane,
-- wyczyszczenie danych stron w przeglądarce kasuje prace,
-- inna przeglądarka na tym samym urządzeniu ma własne, puste dane.
+- wyczyszczenie danych stron w przeglądarce kasuje projekt,
+- inna przeglądarka na tym samym urządzeniu ma własne, puste dane,
+- strona otwarta z adresu w internecie i ten sam plik otwarty lokalnie z dysku to dwa osobne programy z osobnymi danymi.
 
-## Kopia zapasowa
+W przeglądarce jest zawsze **jeden bieżący projekt**.
 
-Rób ją regularnie, a zawsze przed zmianą adresu programu lub przeniesieniem folderu:
+## Zapis i kopia zapasowa
 
-1. Zakładka **Prace** → **Zapisz do pliku**.
-2. Zapisz plik w aplikacji Pliki, najlepiej w iCloud Drive.
-3. Aby wczytać, w tej samej zakładce użyj **Wczytaj z pliku**. Wczytanie zastępuje wszystkie dane na urządzeniu.
+Rób ją regularnie, zawsze przed wczytaniem innego projektu i przed zmianą adresu programu.
 
-W ten sposób przenosisz też prace między urządzeniami lub osobami. To kopia, a nie synchronizacja: zmiany po obu stronach nie scalają się same.
+1. Zakładka **Ustawienia** → **Zapisz w Plikach**.
+2. Na iPhonie i iPadzie otworzy się arkusz udostępniania: wybierz **Zapisz w Plikach** i folder (najlepiej w iCloud Drive). Na komputerze w Edge lub Chrome otworzy się okno zapisu, w którym możesz zastąpić istniejący plik.
+3. Aby wczytać, w tej samej zakładce użyj **Wczytaj z pliku**.
+
+W ten sposób przenosisz też projekt między urządzeniami lub osobami. To kopia, a nie synchronizacja: zmiany po obu stronach nie scalają się same.
 
 ## Zmiana ustawień w kodzie
 
-Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, autorem, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, tekstami rzędów pośrednich i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
+Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, numerem wersji, autorem, rokiem, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, tekstami rzędów powrotnych i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
 
-Uwaga: nie zmieniaj wartości `klucz`, jeśli ktoś już używa programu, bo praca zniknie z widoku. Jeśli chcesz testować na osobnych danych, użyj w testowej kopii innego klucza.
+Uwaga: nie zmieniaj wartości `klucz`, jeśli ktoś już używa programu, bo projekt zniknie z widoku. Do testów na osobnych danych użyj innego klucza.
 
-## Testowanie zmian
+## Aktualizacja programu (lista kontrolna autora)
 
-Zmiany sprawdzaj najpierw lokalnie: otwórz `index.html` dwuklikiem na Macu. Dane lokalne są osobne od danych na stronie w internecie. Przed przeniesieniem folderu w inne miejsce zrób kopię zapasową.
+1. Zmień numer w polu `wersja` w `USTAWIENIA`.
+2. Wgraj plik na GitHub i poczekaj, aż w zakładce Actions pojawi się zielony znaczek.
+3. Zamknij kartę i otwórz adres od nowa (albo odśwież twardo: Cmd+Shift+R na Macu, Ctrl+Shift+R na Windowsie). Zwykłe odświeżenie może pokazać starą wersję.
+4. Sprawdź w stopce, czy numer wersji się zgadza.
+5. Dopiero potem testuj zmianę.
+
+Zmiany sprawdzaj najpierw lokalnie: otwórz `index.html` dwuklikiem. Dane lokalne są osobne od danych na stronie w internecie. Przed przeniesieniem folderu z plikiem w inne miejsce zrób kopię zapasową.
 
 ## Struktura repozytorium
 
 ```
-index.html    cały program
-README.md     ten plik
+index.html          cały program
+img/domyslne.jpg    zdjęcie przykładowego projektu
+README.md           ten plik
 ```
 
 ## Ważne
 
 - To repozytorium jest publiczne. **Nie wrzucaj tu kopii zapasowych ani zdjęć swoich prac.**
 - Program jest udostępniany bez gwarancji. Autor nie odpowiada za utratę danych, dlatego rób kopie zapasowe.
-- Licencja: wszelkie prawa zastrzeżone.
+- Licencja: [uzupełnij]
