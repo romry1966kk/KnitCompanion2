@@ -16,19 +16,19 @@ Program ma trzy zakładki.
 
 ### Śledzenie
 
-- Z listy wybierasz **wzór** (np. „Warkocz - prawy przód”).
-- Widzisz zdjęcie projektu, instrukcję bieżącego rzędu i podgląd kilku następnych rzędów. Nad każdym rzędem podglądu jest instrukcja wpisana w zakładce Projekt.
+- Z listy wybierasz **wzór** (np. „Warkocz - prawy przód”). Obok listy jest ikona **bez końca** (kolorowa = wzór bez końca, szara = wzór ma koniec); kliknięcie zmienia to ustawienie.
+- Widzisz zdjęcie projektu, **panel z instrukcją** aktywnego rzędu (wpisaną w zakładce Projekt) i **tabelę** kilku następnych rzędów. Pod tabelą jest legenda symboli użytych w tym wzorze.
+- Po lewej stronie tabeli, przy aktywnym rzędzie, jest ikona jego rodzaju: **➡ normalny**, **↩ powrót** (robótka płaska) albo **🔄 na okrągło**.
 - **Duży numer** to licznik rzędu tego wzoru. Przyciski **Ukończyłam rząd** i **Cofnij rząd** zmieniają go o jeden. Dotknięcie numeru pozwala wpisać dowolny rząd.
-- Na rzędzie, który kończy wzór (jeśli wzór ma koniec), pojawia się pasek „Koniec wzoru”. Znika po przekroczeniu rzędu lub po cofnięciu licznika. Niczego nie blokuje.
-- Rzędy wzoru i rzędy powrotne następują na zmianę: nieparzyste numery licznika to rzędy wzoru, parzyste to rzędy powrotne (przy robótce płaskiej) albo gładkie (na okrągło).
+- Wzór, który nie jest „bez końca”, po ostatnim rzędzie pokazuje w panelu informację „Koniec wzoru” i obok tabeli ikonę **bez końca**. Kliknięcie ikony włącza dalsze powtarzanie wzoru, a licznik liczy dalej. Nic nie jest blokowane.
 
 ### Projekt
 
 - **Nazwa** projektu, przyciski **Nowy projekt** i **Usuń projekt** oraz opcjonalne **zdjęcie**.
 - **Wzory** projektu: **Nowy wzór**, **Duplikuj wzór** i **Usuń wzór**. Każdy wzór ma własny licznik, własną nazwę i tryb (płasko lub na okrągło). Ten sam wzór możesz zduplikować i nazwać inaczej (np. dla prawego i lewego przodu).
-- **Edytor wzoru:** ustawiasz liczbę oczek i rzędów, wybierasz symbol z palety i malujesz palcem lub myszką. Rząd 1 jest u góry. Wpisujesz tylko rzędy po prawej stronie, rzędy powrotne program dodaje sam.
-- **Instrukcje:** nad każdym rzędem tabelki jest pole na instrukcję. Pojawi się w Śledzeniu.
-- **Koniec wzoru:** zaznaczone „bez końca” oznacza wzór powtarzany bez końca. Odznaczone pozwala wpisać numer rzędu licznika, na którym pokazać pasek końca. Licznik liczy też rzędy powrotne, więc pełny wzór ma 2 × liczba rzędów.
+- **Edytor wzoru:** ustawiasz liczbę oczek i rzędów, wybierasz symbol z palety i malujesz palcem lub myszką. Rząd 1 jest u góry. **Rysujesz wszystkie rzędy, także powrotne**, a wzór powtarza się od pierwszego rzędu.
+- **Instrukcje:** nad każdym rzędem tabelki jest pole na instrukcję (np. „Powrót: przerabiaj oczka tak, jak schodzą z drutu.”). Pojawia się w panelu w Śledzeniu, gdy ten rząd jest aktywny.
+- **🔃 bez końca** (po prawej w wierszu z liczbą oczek i rzędów): podświetlona ikona oznacza wzór powtarzany bez końca.
 - **Ostrzeżenie:** wzór z licznikiem większym niż 1 jest „w użyciu”. Zmiana takiego wzoru może zepsuć pracę, więc program pokazuje pasek ostrzeżenia i pyta przed zmianą. Do prób użyj **Duplikuj wzór**.
 
 ### Ustawienia
