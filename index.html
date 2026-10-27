@@ -171,7 +171,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".6",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".7",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -215,22 +215,22 @@ const IK = {
   bk:      sv('<path stroke-width="3" d="M12 12c-2-3-4-4.5-6-4.5a4.5 4.5 0 0 0 0 9c2 0 4-1.5 6-4.5s4-4.5 6-4.5a4.5 4.5 0 0 1 0 9c-2 0-4-1.5-6-4.5z"/>')
 };
 
-/* Projekt przykładowy: cardigan Marty – ten sam warkocz pod różnymi nazwami (każdy wzór ma 4 rzędy) */
+/* Projekt przykładowy: cardigan Marty. Wszystkie pięć wzorów ma te same cztery rzędy (r2 i r4 to rzędy powrotne),
+   rękawy mają tryb „na okrągło”, reszta „powrotny” */
 function dane0(){
-  const T1 = "przerabiaj oczka tak, jak schodzą z drutu.";        // program dopisze na początku „Powrót: ”
-  const T2 = "Rząd gładki: przerabiaj oczka tak, jak je widzisz.";
-  const wr = (znaki, tekst) => ({kom:[...znaki], tekst});
-  const uk = "\\".repeat(4), pp = "PPLLLLLLLLLLLLPP";
-  const powrotny = nazwa => ({id:uid(), nazwa, tryb:"powrotny", licznik:1, w:16, bk:true, rzedy:[
-    wr("LLPPPP" + uk + "PPPPLL", "Krzyżuj 4 środkowe oczka do tyłu."), wr(pp, T1),
-    wr("LL////PPPPPPPPLL", "Krzyżuj 4 pierwsze oczka do przodu."), wr(pp, T1)]});
-  const okragle = nazwa => ({id:uid(), nazwa, tryb:"okragle", licznik:1, w:16, bk:true, rzedy:[
-    wr("PP////PPPPPPPPPP", "Krzyżuj 4 pierwsze oczka do przodu."), wr("P".repeat(16), T2),
-    wr("PPPPPP" + uk + "PPPPPP", "Krzyżuj 4 środkowe oczka do tyłu."), wr("P".repeat(16), T2)]});
+  const T1 = "przerabiaj oczka tak, jak schodzą z drutu.";        // w trybie powrotnym program dopisze na początku „Powrót: ”
+  const T2 = "Przerabiaj oczka tak, jak je widzisz.";               // w trybie „na okrągło” nic nie jest dopisywane
+  const uk = "\\".repeat(4);
+  const rzedy = pow => [
+    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},          // r1
+    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:pow},                                           // r2 – powrót
+    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},         // r3
+    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:pow}];                                          // r4 – powrót
+  const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle" ? T2 : T1)});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
     projekt:{nazwa:"Cardigan med hette", foto:USTAWIENIA.fotoDomyslne,
-      wzory:[powrotny("Warkocz - dół swetra"), powrotny("Warkocz - prawy przód"), powrotny("Warkocz - lewy przód"),
-             okragle("Warkocz - rękaw pierwszy"), okragle("Warkocz - rękaw drugi")]},
+      wzory:[wzor("Warkocz - dół swetra","powrotny"), wzor("Warkocz - prawy przód","powrotny"), wzor("Warkocz - lewy przód","powrotny"),
+             wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
     ap:null};
 }
 /* Starsze dane (z obszarami) zamieniamy na osobne wzory z własnym licznikiem */
