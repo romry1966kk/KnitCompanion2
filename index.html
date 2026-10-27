@@ -37,9 +37,13 @@ h1{margin:4px 0 0;font-size:clamp(24px,5vw,34px)}
 .ikona{width:1.15em;height:1.15em;vertical-align:-.2em}
 #offline{display:none;position:absolute;right:0;top:0;background:#d62b2b;color:#fff;font-weight:700;
   font-size:13px;padding:5px 10px;border-radius:12px}
-nav{display:flex;gap:6px}
-nav button{flex:1;padding:12px 4px;font-size:clamp(13px,3.6vw,17px);font-weight:600;background:transparent;color:var(--brown)}
-nav button.on{background:var(--brown);color:var(--on-brown)}
+/* zakładki wyglądają jak karty w przeglądarce: lekko na siebie zachodzą, aktywna jest wyższa */
+nav{display:flex;align-items:flex-end;padding:0 10px;border-bottom:2px solid var(--brown)}
+nav button{flex:1;position:relative;margin-left:-10px;min-height:0;padding:10px 4px 8px;font-size:clamp(13px,3.6vw,17px);font-weight:600;
+  color:var(--brown);background:var(--card);border:2px solid var(--brown);border-bottom:none;border-radius:16px 16px 0 0}
+nav button:first-child{margin-left:0}
+nav button.on{z-index:2;padding:14px 4px 12px;margin-bottom:-2px;background:var(--brown);color:var(--bg)}
+nav button:active{transform:none}
 section{display:none;flex-direction:column;gap:14px}
 section.on{display:flex}
 select,input{font:inherit;font-size:17px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);
@@ -47,13 +51,20 @@ select,input{font:inherit;font-size:17px;padding:10px 12px;border-radius:12px;bo
 button{font:inherit;cursor:pointer;border-radius:14px;border:2px solid var(--brown);background:transparent;
   color:var(--brown);padding:10px 16px;-webkit-tap-highlight-color:transparent}
 button:active{transform:scale(.97)}
+button{min-height:44px}
+button:disabled{opacity:.4;cursor:default}
+/* jednolity wygląd przycisków: nieaktywny = obrys, włączony = pełne tło i tekst w kolorze tła */
+button.on{background:var(--brown);color:var(--bg)}
+.tgl{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px}
+.sq{width:44px;padding:0;font-size:22px}
+.eq>button{flex:1}
 .main-btn{background:var(--brown);color:var(--on-brown);font-size:22px;font-weight:700;padding:18px 26px;width:100%;max-width:420px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 @media (max-width:640px){.row2{grid-template-columns:1fr}}
 .photo{width:100%;max-height:420px;object-fit:cover;border-radius:18px;display:block;background:var(--card)}
 .pattern{display:flex;flex-direction:column;gap:10px}
 .instr{background:var(--card);color:var(--brown);border-radius:12px;padding:12px;text-align:center;
-  font-size:18px;font-weight:600;min-height:3.2em;display:flex;align-items:center;justify-content:center}
+  font-size:18px;font-weight:600;min-height:3.2em;display:flex;align-items:center;justify-content:center;white-space:pre-line}
 .crow{display:grid;gap:1px;margin-bottom:1px}
 .c{aspect-ratio:1/.85;display:flex;align-items:center;justify-content:center;background:var(--cell);
   border:1px solid var(--line);font-size:clamp(9px,1.6vw,13px);font-weight:600;overflow:hidden}
@@ -66,15 +77,13 @@ button:active{transform:scale(.97)}
 .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .flex>input{flex:1}
 .pal button{min-width:44px;font-size:18px;font-weight:700}
-.pal button.on{background:var(--brown);color:var(--on-brown)}
 #grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
 #grid label{margin-top:8px}
 .trow{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:4px}
 .ik{color:var(--brown);display:flex;justify-content:center}
 .ik[data-bk]{cursor:pointer}
-.ikbtn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--sub);border-color:var(--line)}
-.ikbtn.on{color:var(--brown);border-color:var(--brown);background:var(--card)}
-.ikbtn svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.erow{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:4px}
+.tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
@@ -96,7 +105,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
-    <div class="flex"><select id="selOb" aria-label="Wzór" style="flex:1"></select><button id="bkSel" class="ikbtn" title="Wzór bez końca"></button></div>
+    <div class="flex"><select id="selOb" aria-label="Wzór" style="flex:1"></select><button id="bkSel" class="tgl" title="Wzór bez końca"></button></div>
     <div class="hint" id="pnazwa"></div>
     <div class="row2">
       <img class="photo" id="foto" alt="Zdjęcie projektu">
@@ -116,19 +125,21 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 2: PROJEKT (zdjęcie i wzory – każdy wzór ma własny licznik i tryb) ===== -->
   <section id="proj">
-    <div class="flex"><input id="projName" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button><button id="projDel">Usuń projekt</button></div>
+    <input id="projName" placeholder="Nazwa projektu" style="width:100%">
+    <div class="flex eq"><button id="projNew">Nowy projekt</button><button id="projDel">Usuń projekt</button></div>
     <label>Zdjęcie projektu (opcjonalne)<input type="file" id="photoIn" accept="image/*"></label>
 
     <div class="card">
       <b>Wzory</b>
-      <div class="flex"><select id="selPat"></select></div>
-      <div class="flex"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel">Usuń wzór</button></div>
-      <div class="flex"><input id="patName" placeholder="Nazwa wzoru"><select id="patTryb"><option value="plasko">płasko</option><option value="okragle">na okrągło</option></select></div>
+      <select id="selPat" style="width:100%"></select>
+      <div class="flex eq"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel">Usuń wzór</button></div>
+      <input id="patName" placeholder="Nazwa wzoru" style="width:100%">
+      <div class="flex eq"><button id="trPow" class="tgl"></button><button id="trOkr" class="tgl"></button></div>
       <div class="ostrz" id="uzycie"></div>
-      <div class="flex">
-        <span>Oczka: <b id="wLbl"></b></span><button id="wMinus">−</button><button id="wPlus">+</button>
-        <span>Rzędy: <b id="hLbl"></b></span><button id="hMinus">−</button><button id="hPlus">+</button>
-        <button id="patBK" class="ikbtn" style="margin-left:auto;width:auto;padding:0 12px;gap:6px" title="Wzór bez końca"></button>
+      <div class="flex" style="justify-content:space-between">
+        <div class="flex"><span>Oczka <b id="wLbl"></b></span><button class="sq" id="wMinus">−</button><button class="sq" id="wPlus">+</button></div>
+        <div class="flex"><span>Rzędy <b id="hLbl"></b></span><button class="sq" id="hMinus">−</button><button class="sq" id="hPlus">+</button></div>
+        <button id="patBK" class="tgl" style="margin-left:auto" title="Wzór bez końca"></button>
       </div>
       <div class="flex pal" id="pal"></div>
       <div id="grid"></div>
@@ -160,7 +171,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".5",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".6",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -180,7 +191,7 @@ const USTAWIENIA = {
 /* =========================================================
    DANE – w przeglądarce jest jeden projekt (cały sweter)
    projekt: {nazwa, foto, wzory:[...]}
-   wzór:    {id, nazwa, tryb ("plasko"/"okragle"), licznik (numer rzędu), w (oczka),
+   wzór:    {id, nazwa, tryb ("powrotny"/"okragle"), licznik (numer rzędu), w (oczka),
              bk (true = wzór bez końca),
              rzedy:[{kom, tekst}] – wszystkie rzędy, także powrotne}
    Każdy wzór ma własny licznik. Licznik zmienia się tylko w zakładce Śledzenie.
@@ -192,7 +203,7 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const liczba = (v, min) => Math.max(min, parseInt(v, 10) || min);
 const opcje = (lista, wybrany) => lista.map(x => `<option value="${x.id}"${x.id === wybrany ? " selected":""}>${esc(x.nazwa)}</option>`).join("");
-const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"plasko", licznik:1, w:16, bk:true, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
+const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"powrotny", licznik:1, w:16, bk:true, rzedy:[{kom:[], tekst:""}, {kom:[], tekst:""}]});
 
 /* Ikony (rysowane w programie, kolor bierze się z koloru tekstu) */
 const sv = d => '<svg viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
@@ -200,24 +211,25 @@ const IK = {
   norm:    sv('<path d="M4 12h15M13 6l6 6-6 6"/>'),
   powrot:  sv('<path d="M9 5L4 10l5 5"/><path d="M4 10h10a6 6 0 0 1 0 12h-3"/>'),
   okr:     sv('<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>'),
-  bk:      sv('<path d="M8 20V5M4 9l4-4 4 4"/><path d="M16 4v15M12 15l4 4 4-4"/>')
+  pow:     sv('<path d="M3 12h13M11 6l6 6-6 6"/><path d="M21 5v14"/>'),
+  bk:      sv('<path stroke-width="3" d="M12 12c-2-3-4-4.5-6-4.5a4.5 4.5 0 0 0 0 9c2 0 4-1.5 6-4.5s4-4.5 6-4.5a4.5 4.5 0 0 1 0 9c-2 0-4-1.5-6-4.5z"/>')
 };
 
-/* Projekt przykładowy: kardigan Marty – ten sam warkocz pod różnymi nazwami */
+/* Projekt przykładowy: cardigan Marty – ten sam warkocz pod różnymi nazwami (każdy wzór ma 4 rzędy) */
 function dane0(){
-  const T1 = "Powrót: przerabiaj oczka tak, jak schodzą z drutu.";
+  const T1 = "przerabiaj oczka tak, jak schodzą z drutu.";        // program dopisze na początku „Powrót: ”
   const T2 = "Rząd gładki: przerabiaj oczka tak, jak je widzisz.";
   const wr = (znaki, tekst) => ({kom:[...znaki], tekst});
   const uk = "\\".repeat(4), pp = "PPLLLLLLLLLLLLPP";
-  const plasko = nazwa => ({id:uid(), nazwa, tryb:"plasko", licznik:1, w:16, bk:true, rzedy:[
+  const powrotny = nazwa => ({id:uid(), nazwa, tryb:"powrotny", licznik:1, w:16, bk:true, rzedy:[
     wr("LLPPPP" + uk + "PPPPLL", "Krzyżuj 4 środkowe oczka do tyłu."), wr(pp, T1),
     wr("LL////PPPPPPPPLL", "Krzyżuj 4 pierwsze oczka do przodu."), wr(pp, T1)]});
   const okragle = nazwa => ({id:uid(), nazwa, tryb:"okragle", licznik:1, w:16, bk:true, rzedy:[
     wr("PP////PPPPPPPPPP", "Krzyżuj 4 pierwsze oczka do przodu."), wr("P".repeat(16), T2),
     wr("PPPPPP" + uk + "PPPPPP", "Krzyżuj 4 środkowe oczka do tyłu."), wr("P".repeat(16), T2)]});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
-    projekt:{nazwa:"Kardigan z warkoczem", foto:USTAWIENIA.fotoDomyslne,
-      wzory:[plasko("Warkocz - dół swetra"), plasko("Warkocz - prawy przód"), plasko("Warkocz - lewy przód"),
+    projekt:{nazwa:"Cardigan med hette", foto:USTAWIENIA.fotoDomyslne,
+      wzory:[powrotny("Warkocz - dół swetra"), powrotny("Warkocz - prawy przód"), powrotny("Warkocz - lewy przód"),
              okragle("Warkocz - rękaw pierwszy"), okragle("Warkocz - rękaw drugi")]},
     ap:null};
 }
@@ -231,7 +243,7 @@ function napraw(t){
     p.wzory = p.wzory.filter(w => !uzyte.has(w.id)).concat(kopie);
     delete p.obszary; t.ap = null;
   }
-  p.wzory.forEach(w => { w.tryb = w.tryb || "plasko"; w.licznik = w.licznik || 1; if (w.bk === undefined) w.bk = !(w.n > 0); delete w.n; });
+  p.wzory.forEach(w => { w.tryb = w.tryb === "okragle" ? "okragle" : "powrotny"; w.licznik = w.licznik || 1; if (w.bk === undefined) w.bk = !(w.n > 0); delete w.n; });
   return t;
 }
 function wczytaj(){
@@ -247,9 +259,16 @@ const aktywny = () => P().wzory.find(w => w.id === DB.ap) || P().wzory[0];   // 
 
 /* =========================================================
    LOGIKA ŚLEDZENIA
-   Cykl = 2 × liczba rzędów wzoru: rząd wzoru, potem rząd powrotny
-   (płasko) albo gładki (na okrągło), i tak w kółko.
+   Wzór składa się z narysowanych rzędów (także powrotnych) i powtarza się od początku.
+   Tryb „powrotny”: rzędy parzyste (2, 4, ...) to powrót. Tryb „na okrągło”: wszystkie rzędy idą w jedną stronę.
+   Wzór bez „bez końca” zatrzymuje licznik na ostatnim rzędzie.
    ========================================================= */
+/* Treść panelu: instrukcja rzędu; przy rzędzie powrotnym program dopisuje „Powrót: ” */
+function tekstRzedu(w, r){
+  const t = (w.rzedy[r].tekst || "").trim();
+  if (w.tryb === "powrotny" && r % 2 === 1) return /^powr[oó]t/i.test(t) ? t : (t ? "Powrót: " + t : "Powrót");
+  return t;
+}
 /* Ikona aktywnego rzędu: na okrągło, albo płasko (rzędy nieparzyste = normalny, parzyste = powrót) */
 const ikonaRzedu = (w, r) => w.tryb === "okragle" ? IK.okr : (r % 2 === 0 ? IK.norm : IK.powrot);
 function wierszWzoru(w, r, now){
@@ -263,22 +282,23 @@ function rysujSledzenie(){
   const w = aktywny(), p = P();
   $("pnazwa").textContent = p.nazwa;
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
-  $("bkSel").className = "ikbtn" + (w && w.bk ? " on" : "");
+  $("bkSel").className = "tgl" + (w && w.bk ? " on" : "");
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
   if (!w || !w.rzedy.length){
     $("instr").textContent = w ? "Ten wzór nie ma jeszcze rzędów." : "Dodaj wzór w zakładce Projekt.";
     $("chart").innerHTML = ""; $("legenda").textContent = ""; $("big").textContent = w ? w.licznik : "–"; return;
   }
-  const R = w.rzedy.length, i0 = w.licznik - 1, koniec = !w.bk && i0 >= R;
+  const R = w.rzedy.length, i0 = w.licznik - 1, ostatni = !w.bk && i0 >= R - 1;
   $("big").textContent = w.licznik;
-  /* panel informacyjny: instrukcja aktywnego rzędu z zakładki Projekt albo informacja o końcu wzoru */
-  $("instr").textContent = koniec ? "Koniec wzoru. Aby kontynuować, kliknij ikonę „bez końca” po lewej stronie tabeli."
-    : w.rzedy[w.bk ? i0 % R : i0].tekst;
+  $("next").disabled = ostatni;                      // wzór z końcem: licznik zatrzymuje się na ostatnim rzędzie
+  const r0 = w.bk ? i0 % R : Math.min(i0, R - 1);
+  /* panel informacyjny: instrukcja aktywnego rzędu z zakładki Projekt (na ostatnim rzędzie dodatkowo informacja o końcu) */
+  $("instr").textContent = tekstRzedu(w, r0) + (ostatni ? "\nKoniec wzoru. Aby kontynuować, kliknij ikonę „bez końca” po lewej stronie tabeli." : "");
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
     const i = i0 + k;
-    if (!w.bk && i >= R){ h += trow(IK.bk, wierszWzoru(w, null, k === 0), true); break; }   // wiersz „po ostatnim” z ikoną
+    if (!w.bk && i >= R){ h += trow(IK.bk, wierszWzoru(w, null, false), true); break; }   // wiersz „po ostatnim”: ikona, bez podświetlenia
     const r = w.bk ? i % R : i;
     h += trow(k === 0 ? ikonaRzedu(w, r) : "", wierszWzoru(w, r, k === 0), false);
   }
@@ -287,7 +307,10 @@ function rysujSledzenie(){
   const uzyte = [...new Set(w.rzedy.flatMap(r => r.kom).filter(Boolean))];
   $("legenda").textContent = uzyte.map(z => { const s = DB.symbole.find(x => x.s === z); return z + (s ? " = " + s.n : ""); }).join(" · ");
 }
-const zmien = d => { const w = aktywny(); if (w){ w.licznik = Math.max(1, w.licznik + d); zapisz(); rysujSledzenie(); } };
+const zmien = d => { const w = aktywny(); if (!w) return; const R = w.rzedy.length;
+  if (!w.bk && d > 0 && w.licznik >= R) return;                       // koniec wzoru: licznik stoi
+  w.licznik = (!w.bk && d < 0 && w.licznik > R) ? R : Math.max(1, w.licznik + d);
+  zapisz(); rysujSledzenie(); };
 
 /* =========================================================
    ZAKŁADKA PROJEKT: zdjęcie i edytor wzorów
@@ -308,19 +331,20 @@ function rysujProjekt(){
   $("selPat").innerHTML = opcje(p.wzory, w && w.id);
   if (!w){ $("grid").innerHTML = ""; $("pal").innerHTML = ""; return; }
   aktWzor = w.id;
-  $("patName").value = w.nazwa; $("patTryb").value = w.tryb;
+  $("patName").value = w.nazwa;
+  $("trPow").className = "tgl" + (w.tryb === "powrotny" ? " on" : ""); $("trOkr").className = "tgl" + (w.tryb === "okragle" ? " on" : "");
   $("uzycie").style.display = w.licznik > 1 ? "block" : "none";
   $("uzycie").textContent = "⚠ Ten wzór jest w użyciu (licznik: " + w.licznik + "). Zmiany mogą zepsuć pracę – do prób użyj Duplikuj wzór.";
-  $("patBK").className = "ikbtn" + (w.bk ? " on" : "");
+  $("patBK").className = "tgl" + (w.bk ? " on" : "");
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
   let g = "";
   w.rzedy.forEach((r, i) => {
     g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"></label>`;
-    g += `<div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
+    g += `<div class="erow"><div class="ik">${w.tryb === "powrotny" && i % 2 === 1 ? IK.powrot : ""}</div><div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
     for (let c = 0; c < w.w; c++) g += `<div class="c" data-r="${i}" data-c="${c}">${esc(r.kom[c] || "")}</div>`;
-    g += "</div>";
+    g += "</div></div>";
   });
   $("grid").innerHTML = g;
 }
@@ -337,7 +361,7 @@ function maluj(el){
 function zmienRozmiar(dw, dh){
   const w = wzor(); if (!w || !mozna(w)) return;
   w.w = Math.min(USTAWIENIA.maxOczek, Math.max(1, w.w + dw));
-  const h = Math.min(USTAWIENIA.maxRzedow, Math.max(1, w.rzedy.length + dh));
+  const h = Math.min(USTAWIENIA.maxRzedow, Math.max(2, w.rzedy.length + dh));
   while (w.rzedy.length < h) w.rzedy.push({kom:[], tekst:""});
   w.rzedy.length = h; zapisz(); rysujProjekt();
 }
@@ -365,7 +389,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 $("next").onclick = () => zmien(1);
 $("prev").onclick = () => zmien(-1);
 $("big").onclick = () => { const w = aktywny(); if (!w) return;
-  const v = prompt("Numer rzędu:", w.licznik); if (v !== null){ w.licznik = liczba(v, 1); zapisz(); rysujSledzenie(); } };
+  const v = prompt("Numer rzędu:", w.licznik); if (v !== null){ w.licznik = liczba(v, 1); if (!w.bk) w.licznik = Math.min(w.licznik, w.rzedy.length); zapisz(); rysujSledzenie(); } };
 $("selOb").onchange = e => { DB.ap = e.target.value; zapisz(); rysujSledzenie(); };
 $("foto").onerror = () => $("foto").style.display = "none";
 
@@ -386,7 +410,10 @@ $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko
 $("patBK").onclick = () => { const w = wzor(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
 $("bkSel").onclick = () => { const w = aktywny(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
 $("chart").onclick = e => { if (e.target.closest("[data-bk]")){ const w = aktywny(); if (w){ w.bk = true; zapisz(); wszystko(); } } };
-$("patTryb").onchange = e => { if (!mozna(wzor())){ rysujProjekt(); return; } wzor().tryb = e.target.value; zapisz(); rysujSledzenie(); };
+const ustawTryb = t => { const w = wzor(); if (!w || w.tryb === t) return;
+  if (!mozna(w)){ rysujProjekt(); return; } w.tryb = t; zapisz(); wszystko(); };
+$("trPow").onclick = () => ustawTryb("powrotny");
+$("trOkr").onclick = () => ustawTryb("okragle");
 $("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
 $("patDup").onclick = () => { const w = wzor(); if (!w) return;
   const k = {...JSON.parse(JSON.stringify(w)), id:uid(), nazwa:w.nazwa + " (kopia)", licznik:1};
@@ -454,7 +481,8 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
 $("stopka").textContent = USTAWIENIA.tytul + USTAWIENIA.wersja + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
-$("bkSel").innerHTML = IK.bk; $("patBK").innerHTML = IK.bk + " bez końca";
+$("bkSel").innerHTML = IK.bk + " bez końca"; $("patBK").innerHTML = IK.bk + " bez końca";
+$("trPow").innerHTML = IK.pow + " powrotny"; $("trOkr").innerHTML = IK.okr + " na okrągło";
 DB = wczytaj(); stanSieci(); wszystko();
 </script>
 </body>
