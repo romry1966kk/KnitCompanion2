@@ -88,6 +88,14 @@ button.on{background:var(--brown);color:var(--bg)}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
+/* lista wyboru: ze strzałką i brązową ramką, żeby nie wyglądała jak pole do wpisywania */
+select{-webkit-appearance:none;appearance:none;padding-right:38px;font-weight:600;border:1.5px solid var(--brown);
+  background-image:linear-gradient(45deg,transparent 50%,var(--brown) 50%),linear-gradient(135deg,var(--brown) 50%,transparent 50%);
+  background-position:calc(100% - 20px) calc(50% + 2px),calc(100% - 14px) calc(50% + 2px);background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+/* wybór pliku: przycisk i napis z informacją lub nazwą wybranego pliku */
+.plik{flex-direction:row;align-items:center;flex-wrap:wrap;gap:10px;cursor:pointer}
+.fbtn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:2px solid var(--brown);border-radius:14px;color:var(--brown);font-size:17px}
+.fname{color:var(--sub);font-size:14px;min-width:0;overflow-wrap:anywhere}
 footer{text-align:center;color:var(--sub);font-size:14px}
 </style>
 </head>
@@ -126,9 +134,11 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 2: PROJEKT (zdjęcie i wzory – każdy wzór ma własny licznik i tryb) ===== -->
   <section id="proj">
-    <input id="projName" placeholder="Nazwa projektu" style="width:100%">
-    <div class="flex eq"><button id="projNew">Nowy projekt</button><button id="projDel">Usuń projekt</button></div>
-    <label>Zdjęcie projektu (opcjonalne)<input type="file" id="photoIn" accept="image/*"></label>
+    <div style="font-size:16px">Projekt: <b id="projInfo"></b></div>
+    <div class="card">
+      <b>Zdjęcie projektu (opcjonalne)</b>
+      <label class="plik"><span class="fbtn">Wybierz plik</span><span class="fname" id="fotoNazwa"></span><input type="file" id="photoIn" accept="image/*,.heic" hidden></label>
+    </div>
 
     <div class="card">
       <b>Wzory</b>
@@ -140,8 +150,8 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="flex" style="justify-content:space-between">
         <div class="flex"><span>Oczka <b id="wLbl"></b></span><button class="sq" id="wMinus">−</button><button class="sq" id="wPlus">+</button></div>
         <div class="flex"><span>Rzędy <b id="hLbl"></b></span><button class="sq" id="hMinus">−</button><button class="sq" id="hPlus">+</button></div>
-        <button id="patBK" class="tgl" style="margin-left:auto" title="Wzór bez końca"></button>
       </div>
+      <div class="flex"><button id="patBK" class="tgl" title="Rzędy bez końca"></button></div>
       <div class="flex pal" id="pal"></div>
       <div id="grid"></div>
       <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Rysuj wszystkie rzędy, także powrotne. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
@@ -151,10 +161,13 @@ footer{text-align:center;color:var(--sub);font-size:14px}
   <!-- ===== ZAKŁADKA 3: USTAWIENIA (słownik symboli, zapis projektu) ===== -->
   <section id="ust">
     <div class="card">
-      <b>Zapis projektu</b>
-      <div class="flex"><button id="exp">Zapisz w Plikach</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
+      <b id="zapTyt"></b>
+      <button id="exp" style="align-self:flex-start">Zapisz w Plikach</button>
+      <label class="plik"><span class="fbtn">Wczytaj z pliku</span><span class="fname" id="impNazwa"></span><input type="file" id="imp" accept=".json" hidden></label>
       <button id="defBtn" style="align-self:flex-start">Wczytaj projekt domyślny</button>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku lub projektu domyślnego zastępuje bieżący projekt.</div>
+      <div class="flex"><input id="nowaNazwa" placeholder="Nazwa nowego projektu"><button id="projNew">Nowy projekt</button></div>
+      <button id="projDel" style="align-self:flex-start">Usuń projekt</button>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, projektu domyślnego i utworzenie nowego projektu zastępują bieżący projekt.</div>
     </div>
     <div class="card">
       <b>Słownik symboli</b>
@@ -173,10 +186,10 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".8",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".9",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
-  klucz:   "KnitCompanion2:v3c",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
+  klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
   maxRzedow: 60,                        // największa liczba rzędów wzoru
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
@@ -328,7 +341,7 @@ function mozna(w){
 }
 function rysujProjekt(){
   const p = P();
-  $("projName").value = p.nazwa;
+  $("projInfo").textContent = p.nazwa;
   const w = wzor();
   $("selPat").innerHTML = opcje(p.wzory, w && w.id);
   if (!w){ $("grid").innerHTML = ""; $("pal").innerHTML = ""; return; }
@@ -351,6 +364,7 @@ function rysujProjekt(){
   $("grid").innerHTML = g;
 }
 function rysujUstawienia(){
+  $("zapTyt").textContent = "Zapis/Odczyt projektu: " + P().nazwa;
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button data-symdel="${i}">Usuń</button></div>`).join("");
 }
@@ -395,16 +409,22 @@ $("big").onclick = () => { const w = aktywny(); if (!w) return;
 $("selOb").onchange = e => { DB.ap = e.target.value; zapisz(); rysujSledzenie(); };
 $("foto").onerror = () => $("foto").style.display = "none";
 
-/* Projekt: nazwa, zdjęcie, nowy projekt */
-$("projName").onchange = e => { P().nazwa = e.target.value || "Projekt"; zapisz(); wszystko(); };
-$("photoIn").onchange = e => { if (e.target.files[0]) wczytajFoto(e.target.files[0]); };
+/* Teksty przy wyborze plików */
+const TXT_JSON = "wybierz plik: .json", TXT_FOTO = "wybierz plik: .png, .jpg, .jpeg, .webp, .gif, .heic";
+function resetPlikow(){ $("impNazwa").textContent = TXT_JSON; $("fotoNazwa").textContent = TXT_FOTO; }
+
+/* Projekt: zdjęcie */
+$("photoIn").onchange = e => { const f = e.target.files[0]; if (f){ $("fotoNazwa").textContent = f.name; wczytajFoto(f); } };
+/* Ustawienia: nowy i usunięty projekt */
 $("projNew").onclick = () => {
-  if (!confirm("Zacząć nowy, pusty projekt? Bieżący zostanie zastąpiony – zapisz go wcześniej w Ustawieniach.")) return;
-  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+  const nazwa = ($("nowaNazwa").value || "").trim();
+  if (!nazwa){ alert("Wpisz nazwę nowego projektu."); return; }
+  if (!confirm("Utworzyć nowy projekt „" + nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")) return;
+  DB.projekt = {nazwa, foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
 };
 $("projDel").onclick = () => {
   if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje.")) return;
-  DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; zapisz(); wszystko();
+  DB.projekt = {nazwa:"(brak projektu)", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
 };
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
@@ -445,15 +465,16 @@ function pobierz(blob, nazwa){
   a.href = URL.createObjectURL(blob); a.download = nazwa; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
-/* 1) okno zapisu (Edge, Chrome na komputerze)  2) arkusz udostępniania (iPhone, iPad)  3) zwykłe pobranie */
+/* 1) okno zapisu (Edge, Chrome na komputerze)  2) arkusz udostępniania (tylko iPhone i iPad)  3) zwykłe pobranie (np. Safari na Macu) */
 async function zapiszWPlikach(){
+  const mobilny = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const nazwa = nazwaPliku(), tekst = JSON.stringify(DB), blob = new Blob([tekst], {type:"application/json"});
   try {
     if (window.showSaveFilePicker){
       const h = await showSaveFilePicker({suggestedName:nazwa, types:[{description:"Projekt Knit Companion", accept:{"application/json":[".json"]}}]});
       const w = await h.createWritable(); await w.write(blob); await w.close(); return;
     }
-    for (const typ of ["application/json", "text/plain"]){
+    if (mobilny) for (const typ of ["application/json", "text/plain"]){
       const f = new File([tekst], nazwa, {type:typ});
       if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; }
     }
@@ -463,19 +484,20 @@ async function zapiszWPlikach(){
 $("exp").onclick = zapiszWPlikach;
 $("imp").onchange = e => {
   const f = e.target.files[0]; if (!f) return;
+  $("impNazwa").textContent = f.name;
   const fr = new FileReader();
   fr.onload = () => { try {
     const t = JSON.parse(fr.result);
     if (t.v !== 3 || !t.projekt || !t.symbole) throw 0;
     if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){
-      DB = napraw(t); DB.ap = null; aktWzor = null; zapisz(); wszystko();
-    }
-  } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); } e.target.value = ""; };
+      DB = napraw(t); DB.ap = null; aktWzor = null; $("fotoNazwa").textContent = TXT_FOTO; zapisz(); wszystko();
+    } else $("impNazwa").textContent = TXT_JSON;
+  } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); $("impNazwa").textContent = TXT_JSON; } e.target.value = ""; };
   fr.readAsText(f);
 };
 
 $("defBtn").onclick = () => {
-  if (confirm("Wczytać projekt domyślny? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){ DB = dane0(); aktWzor = null; zapisz(); wszystko(); }
+  if (confirm("Wczytać projekt domyślny? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){ DB = dane0(); aktWzor = null; resetPlikow(); zapisz(); wszystko(); }
 };
 
 /* czerwona plakietka, gdy brak internetu */
@@ -486,9 +508,9 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
 $("stopka").textContent = USTAWIENIA.tytul + USTAWIENIA.wersja + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
-$("patBK").innerHTML = IK.bk + " bez końca";
-$("trPow").innerHTML = IK.pow + " powrotny"; $("trOkr").innerHTML = IK.okr + " na okrągło";
-DB = wczytaj(); stanSieci(); wszystko();
+$("patBK").innerHTML = IK.bk + " rzędy bez końca";
+$("trPow").innerHTML = IK.pow + " płasko"; $("trOkr").innerHTML = IK.okr + " na okrągło";
+resetPlikow(); DB = wczytaj(); stanSieci(); wszystko();
 </script>
 </body>
 </html>
