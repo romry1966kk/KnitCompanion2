@@ -13,18 +13,18 @@
 :root{
   box-sizing:border-box;
   --bg:#f6f0ea; --card:#ece1d6; --ink:#2b2119; --sub:#7a6a5c;
-  --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
+  --info:#d2691e; --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --brown:#c98f5c; --on-brown:#1c1511;
+    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --brown:#c98f5c; --on-brown:#1c1511;
     --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --brown:#c98f5c; --on-brown:#1c1511;
+  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --brown:#c98f5c; --on-brown:#1c1511;
   --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -64,7 +64,8 @@ button.on{background:var(--brown);color:var(--bg)}
 .photo{width:100%;max-height:420px;object-fit:cover;border-radius:18px;display:block;background:var(--card)}
 .pattern{display:flex;flex-direction:column;gap:10px}
 .instr{background:var(--card);color:var(--brown);border-radius:12px;padding:12px;text-align:center;
-  font-size:18px;font-weight:600;min-height:3.2em;display:flex;align-items:center;justify-content:center;white-space:pre-line}
+  font-size:18px;font-weight:600;min-height:3.2em;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.info{color:var(--info);font-size:.9em;font-weight:700;margin-top:6px}
 .crow{display:grid;gap:1px;margin-bottom:1px}
 .c{aspect-ratio:1/.85;display:flex;align-items:center;justify-content:center;background:var(--cell);
   border:1px solid var(--line);font-size:clamp(9px,1.6vw,13px);font-weight:600;overflow:hidden}
@@ -105,7 +106,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
-    <div class="flex"><select id="selOb" aria-label="Wzór" style="flex:1"></select><button id="bkSel" class="tgl" title="Wzór bez końca"></button></div>
+    <select id="selOb" aria-label="Wzór"></select>
     <div class="hint" id="pnazwa"></div>
     <div class="row2">
       <img class="photo" id="foto" alt="Zdjęcie projektu">
@@ -152,7 +153,8 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     <div class="card">
       <b>Zapis projektu</b>
       <div class="flex"><button id="exp">Zapisz w Plikach</button><label>Wczytaj z pliku<input type="file" id="imp" accept=".json"></label></div>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie zastępuje bieżący projekt.</div>
+      <button id="defBtn" style="align-self:flex-start">Wczytaj projekt domyślny</button>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku lub projektu domyślnego zastępuje bieżący projekt.</div>
     </div>
     <div class="card">
       <b>Słownik symboli</b>
@@ -171,10 +173,10 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".7",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".8",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
-  klucz:   "KnitCompanion2:v3b",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
+  klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
   maxRzedow: 60,                        // największa liczba rzędów wzoru
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
@@ -215,20 +217,20 @@ const IK = {
   bk:      sv('<path stroke-width="3" d="M12 12c-2-3-4-4.5-6-4.5a4.5 4.5 0 0 0 0 9c2 0 4-1.5 6-4.5s4-4.5 6-4.5a4.5 4.5 0 0 1 0 9c-2 0-4-1.5-6-4.5z"/>')
 };
 
-/* Projekt przykładowy: cardigan Marty. Wszystkie pięć wzorów ma te same cztery rzędy (r2 i r4 to rzędy powrotne),
-   rękawy mają tryb „na okrągło”, reszta „powrotny” */
+/* Projekt przykładowy: kardigan Marty. Wszystkie pięć wzorów ma cztery rzędy (r2 i r4 to rzędy powrotne);
+   rękawy mają tryb „na okrągło” i gładkie rzędy r2 i r4, reszta ma tryb „powrotny” */
 function dane0(){
   const T1 = "przerabiaj oczka tak, jak schodzą z drutu.";        // w trybie powrotnym program dopisze na początku „Powrót: ”
   const T2 = "Przerabiaj oczka tak, jak je widzisz.";               // w trybie „na okrągło” nic nie jest dopisywane
   const uk = "\\".repeat(4);
-  const rzedy = pow => [
-    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},          // r1
-    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:pow},                                           // r2 – powrót
-    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},         // r3
-    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:pow}];                                          // r4 – powrót
-  const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle" ? T2 : T1)});
+  const rzedy = rekaw => [
+    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},                                   // r1
+    {kom:[...(rekaw ? "LLPPPPPPPPPPPPLL" : "PPLLLLLLLLLLLLPP")], tekst:rekaw ? T2 : T1},                            // r2
+    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},                                 // r3
+    {kom:[...(rekaw ? "LLPPPPPPPPPPPPLL" : "PPLLLLLLLLLLLLPP")], tekst:rekaw ? T2 : T1}];                           // r4
+  const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle")});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
-    projekt:{nazwa:"Cardigan med hette", foto:USTAWIENIA.fotoDomyslne,
+    projekt:{nazwa:"Kardigan z kapturem", foto:USTAWIENIA.fotoDomyslne,
       wzory:[wzor("Warkocz - dół swetra","powrotny"), wzor("Warkocz - prawy przód","powrotny"), wzor("Warkocz - lewy przód","powrotny"),
              wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
     ap:null};
@@ -282,7 +284,6 @@ function rysujSledzenie(){
   const w = aktywny(), p = P();
   $("pnazwa").textContent = p.nazwa;
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
-  $("bkSel").className = "tgl" + (w && w.bk ? " on" : "");
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
   if (!w || !w.rzedy.length){
@@ -294,7 +295,8 @@ function rysujSledzenie(){
   $("next").disabled = ostatni;                      // wzór z końcem: licznik zatrzymuje się na ostatnim rzędzie
   const r0 = w.bk ? i0 % R : Math.min(i0, R - 1);
   /* panel informacyjny: instrukcja aktywnego rzędu z zakładki Projekt (na ostatnim rzędzie dodatkowo informacja o końcu) */
-  $("instr").textContent = tekstRzedu(w, r0) + (ostatni ? "\nKoniec wzoru. Aby kontynuować, kliknij ikonę „bez końca” po lewej stronie tabeli." : "");
+  $("instr").innerHTML = "<div>" + esc(tekstRzedu(w, r0)) + "</div>" +
+    (ostatni ? '<div class="info">Koniec wzoru. Aby kontynuować, kliknij ikonę „bez końca” po lewej stronie tabeli.</div>' : "");
   let h = "";
   for (let k = 0; k < USTAWIENIA.podgladRzedow; k++){
     const i = i0 + k;
@@ -408,7 +410,6 @@ $("projDel").onclick = () => {
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
 $("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
 $("patBK").onclick = () => { const w = wzor(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
-$("bkSel").onclick = () => { const w = aktywny(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
 $("chart").onclick = e => { if (e.target.closest("[data-bk]")){ const w = aktywny(); if (w){ w.bk = true; zapisz(); wszystko(); } } };
 const ustawTryb = t => { const w = wzor(); if (!w || w.tryb === t) return;
   if (!mozna(w)){ rysujProjekt(); return; } w.tryb = t; zapisz(); wszystko(); };
@@ -473,6 +474,10 @@ $("imp").onchange = e => {
   fr.readAsText(f);
 };
 
+$("defBtn").onclick = () => {
+  if (confirm("Wczytać projekt domyślny? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){ DB = dane0(); aktWzor = null; zapisz(); wszystko(); }
+};
+
 /* czerwona plakietka, gdy brak internetu */
 const stanSieci = () => $("offline").style.display = navigator.onLine ? "none" : "block";
 addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
@@ -481,7 +486,7 @@ addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
 document.title = USTAWIENIA.tytul;
 $("tytul").textContent = USTAWIENIA.tytul;
 $("stopka").textContent = USTAWIENIA.tytul + USTAWIENIA.wersja + " © " + USTAWIENIA.rok + " " + USTAWIENIA.autor;
-$("bkSel").innerHTML = IK.bk + " bez końca"; $("patBK").innerHTML = IK.bk + " bez końca";
+$("patBK").innerHTML = IK.bk + " bez końca";
 $("trPow").innerHTML = IK.pow + " powrotny"; $("trOkr").innerHTML = IK.okr + " na okrągło";
 DB = wczytaj(); stanSieci(); wszystko();
 </script>
