@@ -37,7 +37,7 @@ Sekcja **Zapis/Odczyt projektu: [nazwa projektu]** zawiera:
 
 - **Zapisz w Plikach**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina.
 - **Wczytaj z pliku** (.json): wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie.
-- **Reset do domyślnych**: zastępuje bieżący projekt przykładowym.
+- **Reset do domyślnych**: zastępuje bieżący projekt przykładowym. Przykładowy projekt jest wbudowany w program i ma w nazwie dopisek „(domyślny)”. Przy pierwszej zmianie w zakładce Projekt (wzór, zdjęcie, słownik symboli) program pyta o zgodę i zmienia dopisek na „(zmieniony)”: od tej chwili to Twój projekt zapisany w przeglądarce. Zmiany w kodzie projektu domyślnego widać dopiero po „Reset do domyślnych”.
 - **Nowy projekt**: wpisujesz nazwę i tworzysz pusty projekt.
 - **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje).
 
