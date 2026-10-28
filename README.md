@@ -50,8 +50,8 @@ Czerwona plakietka **OFFLINE** informuje, że urządzenie nie ma połączenia z 
 
 Zakładka pomaga przygotować polecenie (prompt) dla ChatGPT. Ma dwie osobne sekcje i każda zapisuje własny plik tekstowy (.txt):
 
-- **Grafika wzoru**: wybierasz, co pokazać, kolor, wygląd i grubość włóczki, ujęcie i tło. Powstaje polecenie do wygenerowania poglądowej grafiki dzianiny.
-- **Szacunek włóczki**: podajesz rodzaj wyrobu i krój, rozmiar, wagę i metraż motka z etykiety, próbkę 10×10 cm (oczka i rzędy), udział warkoczy i ewentualne uwagi. Powstaje polecenie o oszacowanie ilości włóczki. Wynik to szacunek (zakres, nie dokładna liczba).
+- **Grafika wzoru**: wybierasz, co pokazać, kolor, wygląd i grubość włóczki, ujęcie i tło. Powstaje polecenie do wygenerowania poglądowej grafiki dzianiny. AI ma oddać samą grafikę, bez tekstu, komentarzy i pytań.
+- **Szacunek włóczki**: podajesz rodzaj wyrobu i krój, rozmiar, wagę i metraż motka z etykiety, próbkę 10×10 cm (oczka i rzędy), udział warkoczy i ewentualne uwagi. Powstaje polecenie o oszacowanie ilości włóczki. AI ma odpowiedzieć dwiema liniami z liczbami (minimum i z zapasem, w gramach, metrach i motkach), bez wyjaśnień. Wynik to szacunek, nie dokładne wyliczenie; w razie wątpliwości dopytaj w rozmowie.
 
 Do każdego pliku program dokłada instrukcję, Twoje odpowiedzi (puste pola jako „nie podano”) oraz opis wszystkich wzorów projektu: oczka, rzędy zapisane znakami, instrukcje i legendę symboli. Plik dołącz do rozmowy z ChatGPT albo wklej jego treść. Zdjęcia projektu program do pliku nie dołącza, możesz dodać je do rozmowy osobno. Odpowiedzi z formularzy zapisują się razem z projektem (trafiają też do pliku .json) i nie wywołują pytania o zmianę projektu domyślnego.
 
