@@ -215,7 +215,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".15",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".16",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -475,14 +475,12 @@ function opisWzorow(){
   if (!t) t = "\n(projekt nie ma jeszcze żadnych wzorów)\n";
   return t + "\nLegenda symboli (kropka = puste pole): " + DB.symbole.map(s => `${s.s} = ${s.n}`).join("; ") + "\n";
 }
-const stopkaPromptu = () => "\nZDJĘCIE PROJEKTU\nJeśli dołączę do tej rozmowy zdjęcie projektu, uwzględnij je jako dodatkową informację.\n\nOdpowiedz po polsku.\n";
+/* Prompty mają być twarde: AI ma oddać sam wynik (grafikę albo dwie linie z liczbami), bez komentarzy i pytań */
 function promptGrafika(){
   return [
-    "PROMPT: GRAFIKA WZORU DZIERGANEGO NA DRUTACH",
-    "(przygotowane w programie " + USTAWIENIA.tytul.trim() + ")",
+    "POLECENIE: WYGENERUJ GRAFIKĘ",
     "",
-    "ZADANIE",
-    "Wygeneruj realistyczną grafikę poglądową dzianiny na drutach na podstawie danych poniżej. To ilustracja, a nie projekt techniczny: warkocze i faktura mają wyglądać wiarygodnie i zgodnie z opisem rzędów, ale nie musisz odtwarzać każdego oczka. Jeśli czegoś brakuje („nie podano”), przyjmij rozsądne założenie i wypisz je po grafice.",
+    "Wygeneruj teraz realistyczną grafikę poglądową dzianiny na drutach według danych poniżej. Odpowiedz wyłącznie grafiką: bez żadnego tekstu przed nią i po niej, bez opisu, bez komentarza, bez założeń i bez pytań. Jeśli czegoś brakuje („nie podano”), dobierz to samodzielnie.",
     "",
     "DANE DO GRAFIKI",
     "Co pokazać: " + dana("gCo"),
@@ -493,16 +491,18 @@ function promptGrafika(){
     "Tło: " + dana("gTlo"),
     "",
     "PROJEKT: " + nazwaCzysta(),
-    "WZORY (z programu Knit Companion, rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow() + stopkaPromptu()
+    "WZORY DZIANINY (informacje pomocnicze do grafiki, nie omawiaj ich; rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow(),
+    "Jeśli do rozmowy dołączono zdjęcie projektu, użyj go jako wzoru wyglądu."
   ].join("\n");
 }
 function promptWloczka(){
   return [
-    "PROMPT: SZACUNEK ILOŚCI WŁÓCZKI",
-    "(przygotowane w programie " + USTAWIENIA.tytul.trim() + ")",
+    "POLECENIE: SZACUNEK ILOŚCI WŁÓCZKI",
     "",
-    "ZADANIE",
-    "Oszacuj, ile włóczki potrzeba na ten wyrób. To ma być szacunek, nie dokładne wyliczenie. Podaj wynik jako zakres (od–do) w gramach, w metrach i w liczbie motków zaokrąglonej w górę, osobno wersję minimalną i wersję bezpieczną z zapasem na zakup. Wypisz przyjęte założenia i krótko pokaż tok liczenia (powierzchnia wyrobu, zużycie na próbkę 10×10 cm, dodatek na warkocze). Uwzględnij, że warkocze zużywają więcej włóczki niż dzianina gładka. Jeśli czegoś brakuje („nie podano”), przyjmij rozsądne założenie i je wymień. Na końcu napisz, które dane najbardziej wpływają na wynik.",
+    "Oszacuj, ile włóczki potrzeba na ten wyrób, według danych poniżej. Odpowiedz wyłącznie dwiema liniami z liczbami, w dokładnie takim formacie, bez wstępu, bez wyjaśnień, bez opisu metody, bez założeń i bez pytań:",
+    "Minimum: ... g, ... m, ... motków",
+    "Z zapasem: ... g, ... m, ... motków",
+    "Liczbę motków zaokrąglij w górę. Jeśli nie podano wagi lub metrażu motka, pomiń motki. Uwzględnij, że warkocze zużywają więcej włóczki niż dzianina gładka. Jeśli czegoś brakuje („nie podano”), przyjmij typowe wartości i nie pisz o tym. Odpowiedz po polsku.",
     "",
     "DANE DO SZACUNKU",
     "Rodzaj wyrobu i krój: " + dana("wWyrob"),
@@ -516,7 +516,7 @@ function promptWloczka(){
     "Uwagi: " + dana("wUwagi"),
     "",
     "PROJEKT: " + nazwaCzysta(),
-    "WZORY (z programu Knit Companion, rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow() + stopkaPromptu()
+    "WZORY (informacje pomocnicze, nie omawiaj ich; rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow()
   ].join("\n");
 }
 
