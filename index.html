@@ -87,6 +87,9 @@ button.on{background:var(--brown);color:var(--bg)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* pole Info w Śledzeniu */
+#infoPole{width:100%;margin-top:8px}
+#infoZapis{font-size:13px;margin-top:4px}
 /* zakładka Prompt: formularze */
 .pform{display:flex;flex-direction:column;gap:10px}
 .pform label{flex:1;min-width:130px}
@@ -134,6 +137,8 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="pattern">
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
+        <input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off">
+        <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz w Plikach).</div>
         <div class="hint" id="legenda" style="text-align:center"></div>
       </div>
     </div>
@@ -164,7 +169,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
         <div class="flex"><button class="sq" id="wMinus">−</button><span class="lb">Oczka <b id="wLbl"></b></span><button class="sq" id="wPlus">+</button></div>
         <div class="flex"><button class="sq" id="hMinus">−</button><span class="lb">Rzędy <b id="hLbl"></b></span><button class="sq" id="hPlus">+</button></div>
       </div>
-      <div class="flex"><button id="patBK" class="tgl" title="Rzędy bez końca"></button></div>
+      <div class="flex" style="gap:16px"><button id="patBK" class="tgl" title="Rzędy bez końca"></button><label style="flex:1;min-width:170px">Zestaw Info<select id="patInfo" style="width:100%"></select></label></div>
       <div class="flex pal" id="pal"></div>
       <div class="ostrz" id="waski">Ekran jest za wąski do edycji wzoru. Obróć telefon poziomo. Jeśli ekran się nie obraca, wyłącz blokadę obrotu ekranu.</div>
       <div id="grid"></div>
@@ -215,7 +220,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".17",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".18",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -235,7 +240,8 @@ const USTAWIENIA = {
 
 /* =========================================================
    DANE – w przeglądarce jest jeden projekt (cały sweter)
-   projekt: {nazwa, dom (true = projekt domyślny, jeszcze niezmieniony), foto, wzory:[...]}
+   projekt: {nazwa, dom (true = projekt domyślny, jeszcze niezmieniony), foto, info:{nazwa zestawu:{numer licznika:"notatka"}}, infoBrudne, wzory:[...]}
+   wzór: {..., infoZ: nazwa zestawu Info, z którego korzysta (wspólny dla wielu wzorów; puste = brak)}
    wzór:    {id, nazwa, tryb ("powrotny"/"okragle"), licznik (numer rzędu), w (oczka),
              bk (true = wzór bez końca),
              rzedy:[{kom, tekst}] – wszystkie rzędy, także powrotne}
@@ -253,6 +259,7 @@ const pusty = () => ({id:uid(), nazwa:"Nowy wzór", tryb:"powrotny", licznik:1, 
 /* Ikony (rysowane w programie, kolor bierze się z koloru tekstu) */
 const sv = d => '<svg viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
 const IK = {
+  info:    sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>'),
   norm:    sv('<path d="M4 12h15M13 6l6 6-6 6"/>'),
   powrot:  sv('<path d="M9 5L4 10l5 5"/><path d="M4 10h10a6 6 0 0 1 0 12h-3"/>'),
   okr:     sv('<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>'),
@@ -278,10 +285,13 @@ function dane0(){
     {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:T1}                                      // r4
   ];
   const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle")});
+  const wzory = [wzor("Warkocz - dół swetra","powrotny"), wzor("Warkocz - prawy przód","powrotny"), wzor("Warkocz - lewy przód","powrotny"),
+                 wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")];
+  /* oba rękawy mają wspólny (na razie pusty) zestaw notatek Info, żeby były równe */
+  const zestawRekawow = "Warkocz - rękaw pierwszy";
+  wzory[3].infoZ = zestawRekawow; wzory[4].infoZ = zestawRekawow;
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
-    projekt:{nazwa:"Kardigan z kapturem", dom:true, foto:USTAWIENIA.fotoDomyslne,
-      wzory:[wzor("Warkocz - dół swetra","powrotny"), wzor("Warkocz - prawy przód","powrotny"), wzor("Warkocz - lewy przód","powrotny"),
-             wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
+    projekt:{nazwa:"Kardigan z kapturem", dom:true, foto:USTAWIENIA.fotoDomyslne, info:{[zestawRekawow]:{}}, wzory},
     ap:null};
 }
 /* Starsze dane (z obszarami) zamieniamy na osobne wzory z własnym licznikiem */
@@ -295,6 +305,8 @@ function napraw(t){
     delete p.obszary; t.ap = null;
   }
   p.wzory.forEach(w => { w.tryb = w.tryb === "okragle" ? "okragle" : "powrotny"; w.licznik = w.licznik || 1; if (w.bk === undefined) w.bk = !(w.n > 0); delete w.n; });
+  p.info = p.info || {};
+  p.wzory.forEach(w => { if (w.infoZ && !p.info[w.infoZ]) w.infoZ = ""; });      // wskazanie nieistniejącego zestawu = brak
   return t;
 }
 function wczytaj(){
@@ -338,10 +350,32 @@ function wierszWzoru(w, r, now){
   for (let i = 0; i < w.w; i++) h += `<div class="c">${esc(cells[i] || "")}</div>`;
   return h + "</div>";
 }
+/* ===== Notatki Info: zestawy nazwane (P().info), wzór wskazuje zestaw w w.infoZ; notatka należy do numeru licznika ===== */
+const zestawInfo = w => (w && w.infoZ && P().info && P().info[w.infoZ]) || null;
+const notatka = (w, nr) => { const z = zestawInfo(w); return (z && z[nr]) || ""; };
+const maNotatki = () => Object.values(P().info || {}).some(z => Object.keys(z).length > 0);
+const ostrzInfo = () => maNotatki() ? " Notatki Info tego projektu zostaną utracone." : "";
+/* Zapis notatki aktywnego numeru. Pierwszy wpis we wzorze bez zestawu tworzy zestaw o nazwie wzoru. Bez pytań: to nie jest zmiana rysunku wzoru. */
+function zapiszNotatke(w, tekst){
+  const pusta = !tekst.trim();
+  let z = zestawInfo(w);
+  if (!z){
+    if (pusta) return;
+    P().info = P().info || {};
+    let nazwa = w.nazwa, n = 2;
+    while (P().info[nazwa]) nazwa = w.nazwa + " (" + n++ + ")";
+    P().info[nazwa] = {}; w.infoZ = nazwa; z = P().info[nazwa];
+  }
+  if (pusta) delete z[w.licznik]; else z[w.licznik] = tekst;
+  P().infoBrudne = true; zapisz();
+}
+const pokazZapis = () => { $("infoZapis").style.display = P().infoBrudne ? "block" : "none"; };
 const trow = (ikona, html, bk) => `<div class="trow"><div class="ik"${bk ? " data-bk":""}>${ikona}</div>${html}</div>`;
 function rysujSledzenie(){
   const w = aktywny(), p = P();
   etykietyProjektu();
+  const maR = !!(w && w.rzedy.length);
+  $("infoPole").disabled = !maR; $("infoPole").value = maR ? notatka(w, w.licznik) : ""; pokazZapis();
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
@@ -361,7 +395,7 @@ function rysujSledzenie(){
     const i = i0 + k;
     if (!w.bk && i >= R){ h += trow(IK.bk, wierszWzoru(w, null, false), true); break; }   // wiersz „po ostatnim”: ikona, bez podświetlenia
     const r = w.bk ? i % R : i;
-    h += trow(k === 0 ? ikonaRzedu(w, r) : "", wierszWzoru(w, r, k === 0), false);
+    h += trow(k === 0 ? ikonaRzedu(w, r) : (notatka(w, w.licznik + k) ? IK.info : ""), wierszWzoru(w, r, k === 0), false);   // ikona „i”: w tym rzędzie jest notatka Info
   }
   $("chart").innerHTML = h;
   /* legenda tylko dla symboli użytych w tym wzorze */
@@ -402,6 +436,7 @@ function rysujProjekt(){
   $("uzycie").style.display = w.licznik > 1 ? "block" : "none";
   $("uzycie").textContent = "⚠ Ten wzór jest w użyciu (licznik: " + w.licznik + "). Zmiany mogą zepsuć pracę – do prób użyj Duplikuj wzór.";
   $("patBK").className = "tgl" + (w.bk ? " on" : "");
+  $("patInfo").innerHTML = '<option value="">brak</option>' + Object.keys(p.info || {}).map(n => `<option value="${esc(n)}"${n === w.infoZ ? " selected" : ""}>${esc(n)}</option>`).join("");
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
@@ -582,12 +617,12 @@ $("photoIn").onchange = e => { const f = e.target.files[0]; if (!f) return;
 $("projNew").onclick = () => {
   const nazwa = ($("nowaNazwa").value || "").trim();
   if (!nazwa){ alert("Wpisz nazwę nowego projektu."); return; }
-  if (!confirm("Utworzyć nowy projekt „" + nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")) return;
-  DB.projekt = {nazwa, foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+  if (!confirm("Utworzyć nowy projekt „" + nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())) return;
+  DB.projekt = {nazwa, foto:"", info:{}, wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
 };
 $("projDel").onclick = () => {
-  if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje.")) return;
-  DB.projekt = {nazwa:"(brak projektu)", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
+  if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje." + ostrzInfo())) return;
+  DB.projekt = {nazwa:"(brak projektu)", foto:"", info:{}, wzory:[]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
 };
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
@@ -637,17 +672,26 @@ async function zapiszPlik(tekst, nazwa, mime, opis, rozsz){
   try {
     if (window.showSaveFilePicker){
       const h = await showSaveFilePicker({suggestedName:nazwa, types:[{description:opis, accept:{[mime]:[rozsz]}}]});
-      const w = await h.createWritable(); await w.write(blob); await w.close(); return;
+      const w = await h.createWritable(); await w.write(blob); await w.close(); return true;
     }
     if (mobilny) for (const typ of [mime, "text/plain"]){
       const f = new File([tekst], nazwa, {type:typ});
-      if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; }
+      if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return true; }
     }
-  } catch(e){ if (e && e.name === "AbortError") return; }
-  pobierz(blob, nazwa);
+  } catch(e){ if (e && e.name === "AbortError") return false; }      // Anuluj: nic nie zapisano
+  pobierz(blob, nazwa); return true;
 }
-const zapiszWPlikach = () => zapiszPlik(JSON.stringify(DB), nazwaPliku(), "application/json", "Projekt Knit Companion", ".json");
+/* Zapis projektu: po zapisie znika przypomnienie o niezapisanych danych Info (chyba że klikniesz Anuluj) */
+async function zapiszWPlikach(){
+  const bylo = P().infoBrudne; P().infoBrudne = false;               // w pliku znacznik ma być wyłączony
+  const ok = await zapiszPlik(JSON.stringify(DB), nazwaPliku(), "application/json", "Projekt Knit Companion", ".json");
+  if (ok) zapisz(); else P().infoBrudne = bylo;
+  pokazZapis();
+}
 $("exp").onclick = zapiszWPlikach;
+/* Info: wybór zestawu dla wzoru (bez pytań, nie zmienia rysunku wzoru) i wpisywanie notatki w Śledzeniu */
+$("patInfo").onchange = e => { const w = wzor(); if (!w) return; w.infoZ = e.target.value; P().infoBrudne = true; zapisz(); wszystko(); };
+$("infoPole").addEventListener("input", e => { const w = aktywny(); if (w) zapiszNotatke(w, e.target.value); pokazZapis(); });
 /* Prompt: zapis odpowiedzi z formularzy (bez pytania o projekt domyślny) i zapis plików .txt */
 const zapiszPole = e => { const id = e.target.dataset.p; if (id){ PR()[id] = e.target.value; zapisz(); } };
 $("prompt").addEventListener("input", zapiszPole); $("prompt").addEventListener("change", zapiszPole);
@@ -660,7 +704,7 @@ $("imp").onchange = e => {
   fr.onload = () => { try {
     const t = JSON.parse(fr.result);
     if (t.v !== 3 || !t.projekt || !t.symbole) throw 0;
-    if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){
+    if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())){
       DB = napraw(t); DB.ap = null; aktWzor = null; $("fotoNazwa").textContent = TXT_FOTO; zapisz(); wszystko();
     } else $("impNazwa").textContent = TXT_JSON;
   } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); $("impNazwa").textContent = TXT_JSON; } e.target.value = ""; };
@@ -668,7 +712,7 @@ $("imp").onchange = e => {
 };
 
 $("defBtn").onclick = () => {
-  if (confirm("Zresetować do projektu domyślnego? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej.")){ DB = dane0(); aktWzor = null; resetPlikow(); zapisz(); wszystko(); }
+  if (confirm("Zresetować do projektu domyślnego? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())){ DB = dane0(); aktWzor = null; resetPlikow(); zapisz(); wszystko(); }
 };
 
 /* czerwona plakietka, gdy brak internetu */
