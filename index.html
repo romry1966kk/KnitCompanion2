@@ -168,7 +168,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="flex pal" id="pal"></div>
       <div class="ostrz" id="waski">Ekran jest za wąski do edycji wzoru. Obróć telefon poziomo. Jeśli ekran się nie obraca, wyłącz blokadę obrotu ekranu.</div>
       <div id="grid"></div>
-      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Rysuj wszystkie rzędy, także powrotne. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
+      <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest na dole, kolejne rzędy rosną w górę, jak dzianina na drutach. Rysuj wszystkie rzędy, także powrotne. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
     </div>
   </section>
 
@@ -215,7 +215,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".16",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".17",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -409,12 +409,14 @@ function rysujProjekt(){
   $("grid").className = blok ? "blok" : "";
   if (!blok) $("waski").style.display = "none";
   let g = "";
-  w.rzedy.forEach((r, i) => {
+  /* Tabela jest odwrócona: na górze najwyższy rząd, na dole rząd 1 (dane i numeracja bez zmian, odwrócone jest tylko rysowanie) */
+  for (let i = w.rzedy.length - 1; i >= 0; i--){
+    const r = w.rzedy[i];
     g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"${blok ? " readonly" : ""}></label>`;
     g += `<div class="erow"><div class="ik">${w.tryb === "powrotny" && i % 2 === 1 ? IK.powrot : ""}</div><div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
     for (let c = 0; c < w.w; c++) g += `<div class="c" data-r="${i}" data-c="${c}">${esc(r.kom[c] || "")}</div>`;
     g += "</div></div>";
-  });
+  }
   $("grid").innerHTML = g;
 }
 function rysujUstawienia(){
@@ -443,7 +445,7 @@ const POLA = {
     [{id:"wRozmiar",et:"Rozmiar (S–XL albo wymiary, np. wzrost 160 cm)", lista:["S", "M", "L", "XL"]}],
     [{id:"wWaga",   et:"Waga motka (g)", num:1}, {id:"wMetraz", et:"Metraż motka (m)", num:1}],
     [{id:"wProbkaO",et:"Próbka 10×10 cm: oczka", num:1}, {id:"wProbkaR", et:"Próbka 10×10 cm: rzędy", num:1}],
-    [{id:"wProbkaG",et:"Waga próbki (g), opcjonalnie", num:1}, {id:"wWarkocze", et:"Udział warkoczy", opc:["mało", "średnio", "dużo"]}],
+    [{id:"wProbkaG",et:"Waga próbki (g), opcjonalnie", num:1}, {id:"wWarkocze", et:"Udział wzorów", opc:["mało", "średnio", "dużo"]}],
     [{id:"wUwagi",  et:"Uwagi (kaptur, listwy, ściągacze itp.)"}]
   ]
 };
@@ -502,7 +504,7 @@ function promptWloczka(){
     "Oszacuj, ile włóczki potrzeba na ten wyrób, według danych poniżej. Odpowiedz wyłącznie dwiema liniami z liczbami, w dokładnie takim formacie, bez wstępu, bez wyjaśnień, bez opisu metody, bez założeń i bez pytań:",
     "Minimum: ... g, ... m, ... motków",
     "Z zapasem: ... g, ... m, ... motków",
-    "Liczbę motków zaokrąglij w górę. Jeśli nie podano wagi lub metrażu motka, pomiń motki. Uwzględnij, że warkocze zużywają więcej włóczki niż dzianina gładka. Jeśli czegoś brakuje („nie podano”), przyjmij typowe wartości i nie pisz o tym. Odpowiedz po polsku.",
+    "Liczbę motków zaokrąglij w górę. Jeśli nie podano wagi lub metrażu motka, pomiń motki. Uwzględnij, że wzory strukturalne (np. warkocze) zużywają więcej włóczki niż dzianina gładka. Jeśli czegoś brakuje („nie podano”), przyjmij typowe wartości i nie pisz o tym. Odpowiedz po polsku.",
     "",
     "DANE DO SZACUNKU",
     "Rodzaj wyrobu i krój: " + dana("wWyrob"),
@@ -512,7 +514,7 @@ function promptWloczka(){
     "Próbka 10×10 cm, oczka: " + dana("wProbkaO"),
     "Próbka 10×10 cm, rzędy: " + dana("wProbkaR"),
     "Waga próbki (g): " + dana("wProbkaG"),
-    "Udział warkoczy: " + dana("wWarkocze"),
+    "Udział wzorów: " + dana("wWarkocze"),
     "Uwagi: " + dana("wUwagi"),
     "",
     "PROJEKT: " + nazwaCzysta(),
