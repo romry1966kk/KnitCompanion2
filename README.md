@@ -19,6 +19,7 @@ Program ma cztery zakładki: Śledzenie, Projekt, Ustawienia i Prompt.
 - Z listy wybierasz **wzór** (np. „Warkocz - prawy przód”).
 - Widzisz zdjęcie projektu, **panel z instrukcją** aktywnego rzędu (wpisaną w zakładce Projekt) i **tabelę** kilku następnych rzędów. Pod tabelą jest legenda symboli użytych w tym wzorze.
 - Po lewej stronie tabeli, przy aktywnym rzędzie, jest ikona jego rodzaju: **➡ normalny**, **↩ powrót** (tryb płasko, rzędy parzyste) albo **🔄 na okrągło**. Przy rzędzie powrotnym panel zaczyna się od „Powrót:” (dopisuje to program, w instrukcji wpisujesz tylko resztę).
+- **Pole Info** pod tabelą („Informacja dla tego rzędu”) to miejsce na krótką notatkę techniczną przypisaną do numeru licznika, np. „-2” albo „+10” (zmniejszanie i dodawanie oczek w rękawie). Pokazuje i zmienia notatkę tylko aktywnego rzędu, zapisuje się od razu i nie wywołuje żadnych pytań. Puste pole usuwa notatkę. Rzędy, które mają notatkę, są w tabeli oznaczone po lewej ikoną „i” (od chwili, gdy wejdą do podglądu), a sama treść pokazuje się dopiero przy aktywnym rzędzie. Po zmianie notatek pod polem pojawia się przypomnienie o zapisie projektu do pliku; znika po zapisie (nie znika, jeśli klikniesz Anuluj).
 - **Duży numer** to licznik rzędu tego wzoru. Przyciski **Ukończyłam rząd** i **Cofnij rząd** zmieniają go o jeden. Dotknięcie numeru pozwala wpisać dowolny rząd.
 - Wzór, który nie jest „bez końca”, zatrzymuje licznik na ostatnim rzędzie: przycisk „Ukończyłam rząd” jest wtedy nieaktywny, w panelu pojawia się wyróżniona jaśniejszym kolorem informacja „Koniec wzoru”, a pod tabelą widać (niepodświetlony) wiersz z ikoną **bez końca**. Kliknięcie ikony włącza powtarzanie wzoru i licznik liczy dalej.
 
@@ -30,6 +31,7 @@ Program ma cztery zakładki: Śledzenie, Projekt, Ustawienia i Prompt.
 - **Telefon w pionie:** na wąskim ekranie dotykowym edycja tabeli wzoru jest zablokowana (komórki są za małe). Po dotknięciu tabeli pojawia się pasek z prośbą o obrócenie telefonu poziomo (jeśli ekran się nie obraca, trzeba wyłączyć blokadę obrotu). Próg szerokości jest w `USTAWIENIA` (`minSzerokoscEdycji`). Na komputerze i iPadzie blokady nie ma.
 - **Instrukcje:** nad każdym rzędem tabelki jest pole na instrukcję (np. „Powrót: przerabiaj oczka tak, jak schodzą z drutu.”). Pojawia się w panelu w Śledzeniu, gdy ten rząd jest aktywny.
 - **∞ rzędy bez końca** (przycisk pod wierszem z liczbą oczek i rzędów): podświetlony oznacza wzór powtarzany bez końca.
+- **Zestaw Info** (lista obok „rzędy bez końca”): notatki są zbierane w nazwanych zestawach. Pierwszy wpis w polu Info wzoru bez zestawu tworzy zestaw o nazwie tego wzoru. Dla innego wzoru możesz z listy wybrać istniejący zestaw (zestaw jest wtedy wspólny: zmiana w jednym wzorze widoczna jest w drugim, np. w obu rękawach) albo „brak”. Wybór zestawu nie zmienia rysunku wzoru i nie wywołuje pytań. Duplikat wzoru korzysta z tego samego zestawu. Usunięcie wzoru nie usuwa zestawu. W projekcie domyślnym oba rękawy mają wspólny, początkowo pusty zestaw.
 - **Ostrzeżenie:** wzór z licznikiem większym niż 1 jest „w użyciu”. Zmiana takiego wzoru może zepsuć pracę, więc program pokazuje pasek ostrzeżenia i pyta przed zmianą. Do prób użyj **Duplikuj wzór**.
 
 ### Ustawienia
@@ -37,7 +39,7 @@ Program ma cztery zakładki: Śledzenie, Projekt, Ustawienia i Prompt.
 Sekcja **Zapis/Odczyt projektu: [nazwa projektu]** zawiera:
 
 - **Zapisz w Plikach**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina.
-- **Wczytaj z pliku** (.json): wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie.
+- **Wczytaj z pliku** (.json): wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie (to samo przy resecie, nowym projekcie i usunięciu projektu; jeśli są notatki Info, pytanie przypomina, że zostaną utracone). Notatki Info zapisują się w pliku razem z projektem.
 - **Reset do domyślnych**: zastępuje bieżący projekt przykładowym. Przykładowy projekt jest wbudowany w program i ma w nazwie dopisek „(domyślny)”. Przy pierwszej zmianie w zakładce Projekt (wzór, zdjęcie, słownik symboli) program pyta o zgodę i zmienia dopisek na „(zmieniony)”: od tej chwili to Twój projekt zapisany w przeglądarce. Zmiany w kodzie projektu domyślnego widać dopiero po „Reset do domyślnych”.
 - **Nowy projekt**: wpisujesz nazwę i tworzysz pusty projekt.
 - **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje).
