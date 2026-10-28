@@ -13,18 +13,18 @@
 :root{
   box-sizing:border-box;
   --bg:#f6f0ea; --card:#ece1d6; --ink:#2b2119; --sub:#7a6a5c;
-  --info:#d2691e; --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
+  --info:#d2691e; --zolty:#7a5200; --zolty-tlo:rgba(214,160,0,.2); --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --brown:#c98f5c; --on-brown:#1c1511;
+    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --brown:#c98f5c; --on-brown:#1c1511;
     --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --brown:#c98f5c; --on-brown:#1c1511;
+  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --brown:#c98f5c; --on-brown:#1c1511;
   --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -88,8 +88,11 @@ button.on{background:var(--brown);color:var(--bg)}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
 /* pole Info w Śledzeniu */
-#infoPole{width:100%;margin-top:8px}
-#infoZapis{font-size:13px;margin-top:4px}
+.inforow{display:flex;gap:8px;align-items:stretch;margin-top:8px}
+#infoPole{flex:1;min-width:0}
+#infoDel{min-width:64px}
+/* przypomnienie o zapisie: żółte, ale wyciszone (tło i tekst z palety), żeby zwracało uwagę */
+#infoZapis{color:var(--zolty);background:var(--zolty-tlo);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;margin-top:4px}
 /* zakładka Prompt: formularze */
 .pform{display:flex;flex-direction:column;gap:10px}
 .pform label{flex:1;min-width:130px}
@@ -130,14 +133,14 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
   <section id="sled" class="on">
+    <div class="projinfo">Projekt: <b id="pnazwa"></b></div>
     <select id="selOb" aria-label="Wzór"></select>
-    <div class="hint" id="pnazwa"></div>
     <div class="row2">
       <img class="photo" id="foto" alt="Zdjęcie projektu">
       <div class="pattern">
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
-        <input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off">
+        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" title="Usuń notatkę tego rzędu">Del</button></div>
         <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz w Plikach).</div>
         <div class="hint" id="legenda" style="text-align:center"></div>
       </div>
@@ -220,7 +223,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".18",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".19",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -369,13 +372,14 @@ function zapiszNotatke(w, tekst){
   if (pusta) delete z[w.licznik]; else z[w.licznik] = tekst;
   P().infoBrudne = true; zapisz();
 }
+const odswiezDel = () => { $("infoDel").disabled = $("infoPole").disabled || !$("infoPole").value.trim(); };
 const pokazZapis = () => { $("infoZapis").style.display = P().infoBrudne ? "block" : "none"; };
 const trow = (ikona, html, bk) => `<div class="trow"><div class="ik"${bk ? " data-bk":""}>${ikona}</div>${html}</div>`;
 function rysujSledzenie(){
   const w = aktywny(), p = P();
   etykietyProjektu();
   const maR = !!(w && w.rzedy.length);
-  $("infoPole").disabled = !maR; $("infoPole").value = maR ? notatka(w, w.licznik) : ""; pokazZapis();
+  $("infoPole").disabled = !maR; $("infoPole").value = maR ? notatka(w, w.licznik) : ""; odswiezDel(); pokazZapis();
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
@@ -691,7 +695,8 @@ async function zapiszWPlikach(){
 $("exp").onclick = zapiszWPlikach;
 /* Info: wybór zestawu dla wzoru (bez pytań, nie zmienia rysunku wzoru) i wpisywanie notatki w Śledzeniu */
 $("patInfo").onchange = e => { const w = wzor(); if (!w) return; w.infoZ = e.target.value; P().infoBrudne = true; zapisz(); wszystko(); };
-$("infoPole").addEventListener("input", e => { const w = aktywny(); if (w) zapiszNotatke(w, e.target.value); pokazZapis(); });
+$("infoPole").addEventListener("input", e => { const w = aktywny(); if (w) zapiszNotatke(w, e.target.value); odswiezDel(); pokazZapis(); });
+$("infoDel").onclick = () => { const w = aktywny(); if (!w) return; zapiszNotatke(w, ""); $("infoPole").value = ""; odswiezDel(); pokazZapis(); };   // duży przycisk zamiast klawiatury
 /* Prompt: zapis odpowiedzi z formularzy (bez pytania o projekt domyślny) i zapis plików .txt */
 const zapiszPole = e => { const id = e.target.dataset.p; if (id){ PR()[id] = e.target.value; zapisz(); } };
 $("prompt").addEventListener("input", zapiszPole); $("prompt").addEventListener("change", zapiszPole);
