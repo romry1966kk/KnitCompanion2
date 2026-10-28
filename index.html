@@ -87,6 +87,10 @@ button.on{background:var(--brown);color:var(--bg)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* nazwa projektu w zakładce Projekt: jasne tło i ciemny tekst w obu motywach */
+.projinfo{background:#f2b46d;color:#2b2119;border-radius:12px;padding:10px 14px;font-size:17px}
+/* napis między [−] a [+]: stała szerokość, żeby grupy Oczka i Rzędy były równe */
+.lb{display:inline-block;width:10ch;text-align:center}
 label{font-size:14px;color:var(--sub);display:flex;flex-direction:column;gap:2px}
 /* lista wyboru: ze strzałką i brązową ramką, żeby nie wyglądała jak pole do wpisywania */
 select{-webkit-appearance:none;appearance:none;padding-right:38px;font-weight:600;border:1.5px solid var(--brown);
@@ -134,7 +138,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
 
   <!-- ===== ZAKŁADKA 2: PROJEKT (zdjęcie i wzory – każdy wzór ma własny licznik i tryb) ===== -->
   <section id="proj">
-    <div style="font-size:16px">Projekt: <b id="projInfo"></b></div>
+    <div class="projinfo">Projekt: <b id="projInfo"></b></div>
     <div class="card">
       <b>Zdjęcie projektu (opcjonalne)</b>
       <label class="plik"><span class="fbtn">Wybierz plik</span><span class="fname" id="fotoNazwa"></span><input type="file" id="photoIn" accept="image/*,.heic" hidden></label>
@@ -148,8 +152,8 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="flex eq" style="margin-top:10px"><button id="trPow" class="tgl"></button><button id="trOkr" class="tgl"></button></div>
       <div class="ostrz" id="uzycie"></div>
       <div class="flex" style="gap:16px">
-        <div class="flex"><button class="sq" id="wMinus">−</button><span>Oczka <b id="wLbl"></b></span><button class="sq" id="wPlus">+</button></div>
-        <div class="flex"><button class="sq" id="hMinus">−</button><span>Rzędy <b id="hLbl"></b></span><button class="sq" id="hPlus">+</button></div>
+        <div class="flex"><button class="sq" id="wMinus">−</button><span class="lb">Oczka <b id="wLbl"></b></span><button class="sq" id="wPlus">+</button></div>
+        <div class="flex"><button class="sq" id="hMinus">−</button><span class="lb">Rzędy <b id="hLbl"></b></span><button class="sq" id="hPlus">+</button></div>
       </div>
       <div class="flex"><button id="patBK" class="tgl" title="Rzędy bez końca"></button></div>
       <div class="flex pal" id="pal"></div>
@@ -167,7 +171,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <button id="defBtn" style="align-self:flex-start">Reset do domyślnych</button>
       <div class="flex"><input id="nowaNazwa" placeholder="Nazwa nowego projektu"><button id="projNew">Nowy projekt</button></div>
       <button id="projDel" style="align-self:flex-start">Usuń projekt</button>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych i utworzenie nowego projektu zastępują bieżący projekt.</div>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych i utworzenie nowego projektu zastępują bieżący projekt. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
     </div>
     <div class="card">
       <b>Słownik symboli</b>
@@ -186,7 +190,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".10",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".11",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -205,7 +209,7 @@ const USTAWIENIA = {
 
 /* =========================================================
    DANE – w przeglądarce jest jeden projekt (cały sweter)
-   projekt: {nazwa, foto, wzory:[...]}
+   projekt: {nazwa, dom (true = projekt domyślny, jeszcze niezmieniony), foto, wzory:[...]}
    wzór:    {id, nazwa, tryb ("powrotny"/"okragle"), licznik (numer rzędu), w (oczka),
              bk (true = wzór bez końca),
              rzedy:[{kom, tekst}] – wszystkie rzędy, także powrotne}
@@ -243,7 +247,7 @@ function dane0(){
     {kom:[...(rekaw ? "LLPPPPPPPPPPPPLL" : "PPLLLLLLLLLLLLPP")], tekst:rekaw ? T2 : T1}];                           // r4
   const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle")});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
-    projekt:{nazwa:"Kardigan z kapturem", foto:USTAWIENIA.fotoDomyslne,
+    projekt:{nazwa:"Kardigan z kapturem", dom:true, foto:USTAWIENIA.fotoDomyslne,
       wzory:[wzor("Warkocz - dół swetra","powrotny"), wzor("Warkocz - prawy przód","powrotny"), wzor("Warkocz - lewy przód","powrotny"),
              wzor("Warkocz - rękaw pierwszy","okragle"), wzor("Warkocz - rękaw drugi","okragle")]},
     ap:null};
@@ -270,6 +274,16 @@ function zapisz(){
   catch(e){ alert("Nie udało się zapisać danych w przeglądarce. Zapisz projekt do pliku."); }
 }
 const P = () => DB.projekt;
+/* Nazwa projektu do wyświetlania: projekt domyślny ma dopisek „(domyślny)” */
+const nazwaP = () => P().nazwa + (P().dom ? " (domyślny)" : "");
+function etykietyProjektu(){ $("pnazwa").textContent = nazwaP(); $("projInfo").textContent = nazwaP(); $("zapTyt").textContent = "Zapis/Odczyt projektu: " + nazwaP(); }
+/* Pierwsza zmiana projektu domyślnego: pytamy, a po zgodzie projekt staje się „zmieniony” (nie jest już domyślny) */
+function zmianaDom(){
+  if (!P().dom) return true;
+  const nowa = P().nazwa + " (zmieniony)";
+  if (!confirm("Ten projekt jest domyślny. Zmiana zapisze go w tej przeglądarce jako Twój projekt „" + nowa + "”. Domyślny przywrócisz przyciskiem Reset do domyślnych w Ustawieniach. Kontynuować?")) return false;
+  P().dom = false; P().nazwa = nowa; zapisz(); etykietyProjektu(); return true;
+}
 const aktywny = () => P().wzory.find(w => w.id === DB.ap) || P().wzory[0];   // wzór wybrany w Śledzeniu
 
 /* =========================================================
@@ -295,7 +309,7 @@ function wierszWzoru(w, r, now){
 const trow = (ikona, html, bk) => `<div class="trow"><div class="ik"${bk ? " data-bk":""}>${ikona}</div>${html}</div>`;
 function rysujSledzenie(){
   const w = aktywny(), p = P();
-  $("pnazwa").textContent = p.nazwa;
+  etykietyProjektu();
   $("selOb").innerHTML = opcje(p.wzory, w && w.id);
   $("foto").style.display = p.foto ? "block" : "none";
   if (p.foto) $("foto").src = p.foto;
@@ -335,13 +349,15 @@ const wzor = () => P().wzory.find(w => w.id === aktWzor) || P().wzory[0];
 const zgoda = {};
 function mozna(w){
   if (!w) return false;
-  if (w.licznik <= 1 || zgoda[w.id]) return true;
-  if (confirm("Ten wzór jest już w użyciu (licznik: " + w.licznik + "). Zmiana może zepsuć pracę: zrobione rzędy wyglądały inaczej. Jeśli chcesz tylko spróbować, użyj Duplikuj wzór. Zmienić mimo to?")){ zgoda[w.id] = true; return true; }
-  return false;
+  if (w.licznik > 1 && !zgoda[w.id]){
+    if (!confirm("Ten wzór jest już w użyciu (licznik: " + w.licznik + "). Zmiana może zepsuć pracę: zrobione rzędy wyglądały inaczej. Jeśli chcesz tylko spróbować, użyj Duplikuj wzór. Zmienić mimo to?")) return false;
+    zgoda[w.id] = true;
+  }
+  return zmianaDom();
 }
 function rysujProjekt(){
   const p = P();
-  $("projInfo").textContent = p.nazwa;
+  etykietyProjektu();
   const w = wzor();
   $("selPat").innerHTML = opcje(p.wzory, w && w.id);
   if (!w){ $("grid").innerHTML = ""; $("pal").innerHTML = ""; return; }
@@ -364,7 +380,7 @@ function rysujProjekt(){
   $("grid").innerHTML = g;
 }
 function rysujUstawienia(){
-  $("zapTyt").textContent = "Zapis/Odczyt projektu: " + P().nazwa;
+  etykietyProjektu();
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button data-symdel="${i}">Usuń</button></div>`).join("");
 }
@@ -414,7 +430,9 @@ const TXT_JSON = "wybierz plik: .json", TXT_FOTO = "wybierz plik: .png, .jpg, .j
 function resetPlikow(){ $("impNazwa").textContent = TXT_JSON; $("fotoNazwa").textContent = TXT_FOTO; }
 
 /* Projekt: zdjęcie */
-$("photoIn").onchange = e => { const f = e.target.files[0]; if (f){ $("fotoNazwa").textContent = f.name; wczytajFoto(f); } };
+$("photoIn").onchange = e => { const f = e.target.files[0]; if (!f) return;
+  if (!zmianaDom()){ e.target.value = ""; return; }
+  $("fotoNazwa").textContent = f.name; wczytajFoto(f); };
 /* Ustawienia: nowy i usunięty projekt */
 $("projNew").onclick = () => {
   const nazwa = ($("nowaNazwa").value || "").trim();
@@ -428,18 +446,18 @@ $("projDel").onclick = () => {
 };
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
-$("patName").onchange = e => { wzor().nazwa = e.target.value; zapisz(); wszystko(); };
-$("patBK").onclick = () => { const w = wzor(); if (w){ w.bk = !w.bk; zapisz(); wszystko(); } };
-$("chart").onclick = e => { if (e.target.closest("[data-bk]")){ const w = aktywny(); if (w){ w.bk = true; zapisz(); wszystko(); } } };
+$("patName").onchange = e => { if (!zmianaDom()){ rysujProjekt(); return; } wzor().nazwa = e.target.value; zapisz(); wszystko(); };
+$("patBK").onclick = () => { const w = wzor(); if (w && zmianaDom()){ w.bk = !w.bk; zapisz(); wszystko(); } };
+$("chart").onclick = e => { if (e.target.closest("[data-bk]")){ const w = aktywny(); if (w && zmianaDom()){ w.bk = true; zapisz(); wszystko(); } } };
 const ustawTryb = t => { const w = wzor(); if (!w || w.tryb === t) return;
   if (!mozna(w)){ rysujProjekt(); return; } w.tryb = t; zapisz(); wszystko(); };
 $("trPow").onclick = () => ustawTryb("powrotny");
 $("trOkr").onclick = () => ustawTryb("okragle");
-$("patNew").onclick = () => { const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
-$("patDup").onclick = () => { const w = wzor(); if (!w) return;
+$("patNew").onclick = () => { if (!zmianaDom()) return; const w = pusty(); P().wzory.push(w); aktWzor = w.id; zapisz(); wszystko(); };
+$("patDup").onclick = () => { const w = wzor(); if (!w || !zmianaDom()) return;
   const k = {...JSON.parse(JSON.stringify(w)), id:uid(), nazwa:w.nazwa + " (kopia)", licznik:1};
   P().wzory.push(k); aktWzor = k.id; zapisz(); wszystko(); };
-$("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór „" + w.nazwa + "” razem z jego licznikiem?")) return;
+$("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór „" + w.nazwa + "” razem z jego licznikiem?") || !zmianaDom()) return;
   P().wzory = P().wzory.filter(x => x.id !== w.id); aktWzor = null; zapisz(); wszystko(); };
 $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmienRozmiar(1, 0);
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
@@ -450,14 +468,14 @@ $("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t 
 $("grid").addEventListener("pointermove", e => { if (maluje) maluj(document.elementFromPoint(e.clientX, e.clientY)); });
 window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); rysujSledzenie(); } });
 /* Ustawienia: słownik symboli */
-$("symTab").onchange = e => { const d = e.target.dataset; if (d.sy !== undefined){ DB.symbole[+d.sy][d.f] = e.target.value; zapisz(); wszystko(); } };
-$("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ DB.symbole.splice(+e.target.dataset.symdel, 1); zapisz(); wszystko(); } };
-$("symAdd").onclick = () => { DB.symbole.push({s:"?", n:"nowy symbol"}); zapisz(); wszystko(); };
+$("symTab").onchange = e => { const d = e.target.dataset; if (d.sy !== undefined){ if (!zmianaDom()){ wszystko(); return; } DB.symbole[+d.sy][d.f] = e.target.value; zapisz(); wszystko(); } };
+$("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ if (!zmianaDom()) return; DB.symbole.splice(+e.target.dataset.symdel, 1); zapisz(); wszystko(); } };
+$("symAdd").onclick = () => { if (!zmianaDom()) return; DB.symbole.push({s:"?", n:"nowy symbol"}); zapisz(); wszystko(); };
 
 /* Ustawienia: zapis i wczytanie projektu */
 function nazwaPliku(){
   const d = new Date(), z = n => String(n).padStart(2, "0");
-  return P().nazwa.replace(/[\\\/:*?"<>|]/g, "-") + " " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
+  return nazwaP().replace(/[\\\/:*?"<>|]/g, "-") + " " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
          " " + z(d.getHours()) + "-" + z(d.getMinutes()) + ".json";
 }
 function pobierz(blob, nazwa){
