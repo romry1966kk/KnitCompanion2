@@ -87,6 +87,10 @@ button.on{background:var(--brown);color:var(--bg)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* zakładka Prompt: formularze */
+.pform{display:flex;flex-direction:column;gap:10px}
+.pform label{flex:1;min-width:130px}
+.pform select,.pform input{width:100%}
 /* pasek „obróć telefon”: przykleja się u góry, żeby było go widać przy długiej tabeli */
 #waski{position:sticky;top:8px;z-index:5}
 /* gdy edycja jest zablokowana, tabela nie przechwytuje przewijania palcem */
@@ -118,6 +122,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     <button data-tab="sled" class="on">Śledzenie</button>
     <button data-tab="proj">Projekt</button>
     <button data-tab="ust">Ustawienia</button>
+    <button data-tab="prompt">Prompt</button>
   </nav>
 
   <!-- ===== ZAKŁADKA 1: ŚLEDZENIE (tu jest licznik – tylko tu go zmieniasz) ===== -->
@@ -186,6 +191,21 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     </div>
   </section>
 
+  <!-- ===== ZAKŁADKA 4: PROMPT (pliki .txt do wklejenia w ChatGPT: grafika wzoru i szacunek włóczki) ===== -->
+  <section id="prompt">
+    <div class="card">
+      <b>Grafika wzoru</b>
+      <div class="pform" id="pgForm"></div>
+      <button id="pgSave" style="align-self:flex-start">Zapisz prompt grafiki (.txt)</button>
+    </div>
+    <div class="card">
+      <b>Szacunek włóczki</b>
+      <div class="pform" id="pwForm"></div>
+      <button id="pwSave" style="align-self:flex-start">Zapisz prompt włóczki (.txt)</button>
+    </div>
+    <div class="hint">Każdy przycisk tworzy plik tekstowy z instrukcją, Twoimi danymi i opisem wzorów z projektu. Otwórz rozmowę z ChatGPT i dołącz plik albo wklej jego treść (zdjęcie projektu możesz dołączyć osobno). Puste pola są w pliku oznaczone jako „nie podano”. Wynik to szacunek, nie dokładne wyliczenie. Dane z formularzy zapisują się razem z projektem.</div>
+  </section>
+
   <footer id="stopka"></footer>
 </main>
 
@@ -195,7 +215,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".14",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".15",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -402,7 +422,105 @@ function rysujUstawienia(){
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button data-symdel="${i}">Usuń</button></div>`).join("");
 }
-function wszystko(){ rysujSledzenie(); rysujProjekt(); rysujUstawienia(); }
+/* =========================================================
+   ZAKŁADKA PROMPT: formularze i pliki .txt do wklejenia w ChatGPT
+   Odpowiedzi z formularzy zapisują się w projekcie (P().prompt) i nie liczą się jako zmiana projektu domyślnego.
+   ========================================================= */
+const PR = () => P().prompt || (P().prompt = {});
+const NIE_PODANO = "— nie podano —";
+/* każdy wiersz formularza to lista pól; pola z opc to listy wyboru, z lista – pole z podpowiedziami, z num – liczba */
+const POLA = {
+  g: [
+    [{id:"gCo",     et:"Co pokazać", opc:["fragment dzianiny z warkoczem, z bliska", "cały wyrób"]}],
+    [{id:"gKolor",  et:"Kolor włóczki (np. ecru, ciemny granat)"}],
+    [{id:"gWyglad", et:"Wygląd włóczki", opc:["matowa wełna", "puszysty moher", "gładka bawełna"]},
+     {id:"gGrub",   et:"Grubość włóczki", opc:["cienka", "średnia", "gruba"]}],
+    [{id:"gUjecie", et:"Ujęcie", opc:["z przodu", "z boku", "z bliska", "ułożony na płasko"]},
+     {id:"gTlo",    et:"Tło", opc:["białe", "szare", "jasne drewno", "ciemne drewno", "jasna tkanina"]}]
+  ],
+  w: [
+    [{id:"wWyrob",  et:"Rodzaj wyrobu i krój", lista:["kardigan z kapturem", "kardigan", "sweter dopasowany", "sweter luźny", "szalik", "czapka"]}],
+    [{id:"wRozmiar",et:"Rozmiar (S–XL albo wymiary, np. wzrost 160 cm)", lista:["S", "M", "L", "XL"]}],
+    [{id:"wWaga",   et:"Waga motka (g)", num:1}, {id:"wMetraz", et:"Metraż motka (m)", num:1}],
+    [{id:"wProbkaO",et:"Próbka 10×10 cm: oczka", num:1}, {id:"wProbkaR", et:"Próbka 10×10 cm: rzędy", num:1}],
+    [{id:"wProbkaG",et:"Waga próbki (g), opcjonalnie", num:1}, {id:"wWarkocze", et:"Udział warkoczy", opc:["mało", "średnio", "dużo"]}],
+    [{id:"wUwagi",  et:"Uwagi (kaptur, listwy, ściągacze itp.)"}]
+  ]
+};
+function poleHTML(f){
+  const v = String(PR()[f.id] || "");
+  let el;
+  if (f.opc) el = `<select data-p="${f.id}"><option value="">${NIE_PODANO}</option>` + f.opc.map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("") + "</select>";
+  else el = `<input data-p="${f.id}" value="${esc(v)}"${f.num ? ' type="number" inputmode="decimal" min="0"' : ""}${f.lista ? ` list="dl_${f.id}"` : ""}>`
+    + (f.lista ? `<datalist id="dl_${f.id}">` + f.lista.map(o => `<option value="${esc(o)}">`).join("") + "</datalist>" : "");
+  return `<label>${esc(f.et)}${el}</label>`;
+}
+const formHTML = k => POLA[k].map(w => w.length > 1 ? `<div class="flex">${w.map(poleHTML).join("")}</div>` : poleHTML(w[0])).join("");
+function rysujPrompt(){ $("pgForm").innerHTML = formHTML("g"); $("pwForm").innerHTML = formHTML("w"); }
+
+const dana = id => String(PR()[id] || "").trim() || "nie podano";
+const nazwaCzysta = () => P().nazwa.replace(/ \((domyślny|zmieniony)\)$/, "");
+/* Opis wzorów z projektu: oczka, rzędy, instrukcje i legenda symboli */
+function opisWzorow(){
+  let t = "";
+  P().wzory.forEach(w => {
+    t += `\nWzór: ${w.nazwa}\n`;
+    t += `Tryb: ${w.tryb === "okragle" ? "na okrągło (wszystkie rzędy w jedną stronę)" : "płasko (rzędy parzyste to powroty)"}; oczek: ${w.w}; rzędów: ${w.rzedy.length}; `
+       + `${w.bk ? "wzór powtarza się od rzędu 1 bez końca" : "wzór bez powtarzania, kończy się na ostatnim rzędzie"}.\n`;
+    w.rzedy.forEach((r, i) => {
+      const znaki = Array.from({length:w.w}, (_, c) => r.kom[c] || ".").join(""), instr = tekstRzedu(w, i);
+      t += `Rząd ${i + 1}: ${znaki}${instr ? " | " + instr : ""}\n`;
+    });
+  });
+  if (!t) t = "\n(projekt nie ma jeszcze żadnych wzorów)\n";
+  return t + "\nLegenda symboli (kropka = puste pole): " + DB.symbole.map(s => `${s.s} = ${s.n}`).join("; ") + "\n";
+}
+const stopkaPromptu = () => "\nZDJĘCIE PROJEKTU\nJeśli dołączę do tej rozmowy zdjęcie projektu, uwzględnij je jako dodatkową informację.\n\nOdpowiedz po polsku.\n";
+function promptGrafika(){
+  return [
+    "PROMPT: GRAFIKA WZORU DZIERGANEGO NA DRUTACH",
+    "(przygotowane w programie " + USTAWIENIA.tytul.trim() + ")",
+    "",
+    "ZADANIE",
+    "Wygeneruj realistyczną grafikę poglądową dzianiny na drutach na podstawie danych poniżej. To ilustracja, a nie projekt techniczny: warkocze i faktura mają wyglądać wiarygodnie i zgodnie z opisem rzędów, ale nie musisz odtwarzać każdego oczka. Jeśli czegoś brakuje („nie podano”), przyjmij rozsądne założenie i wypisz je po grafice.",
+    "",
+    "DANE DO GRAFIKI",
+    "Co pokazać: " + dana("gCo"),
+    "Kolor włóczki: " + dana("gKolor"),
+    "Wygląd włóczki: " + dana("gWyglad"),
+    "Grubość włóczki: " + dana("gGrub"),
+    "Ujęcie: " + dana("gUjecie"),
+    "Tło: " + dana("gTlo"),
+    "",
+    "PROJEKT: " + nazwaCzysta(),
+    "WZORY (z programu Knit Companion, rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow() + stopkaPromptu()
+  ].join("\n");
+}
+function promptWloczka(){
+  return [
+    "PROMPT: SZACUNEK ILOŚCI WŁÓCZKI",
+    "(przygotowane w programie " + USTAWIENIA.tytul.trim() + ")",
+    "",
+    "ZADANIE",
+    "Oszacuj, ile włóczki potrzeba na ten wyrób. To ma być szacunek, nie dokładne wyliczenie. Podaj wynik jako zakres (od–do) w gramach, w metrach i w liczbie motków zaokrąglonej w górę, osobno wersję minimalną i wersję bezpieczną z zapasem na zakup. Wypisz przyjęte założenia i krótko pokaż tok liczenia (powierzchnia wyrobu, zużycie na próbkę 10×10 cm, dodatek na warkocze). Uwzględnij, że warkocze zużywają więcej włóczki niż dzianina gładka. Jeśli czegoś brakuje („nie podano”), przyjmij rozsądne założenie i je wymień. Na końcu napisz, które dane najbardziej wpływają na wynik.",
+    "",
+    "DANE DO SZACUNKU",
+    "Rodzaj wyrobu i krój: " + dana("wWyrob"),
+    "Rozmiar: " + dana("wRozmiar"),
+    "Waga motka (g): " + dana("wWaga"),
+    "Metraż motka (m): " + dana("wMetraz"),
+    "Próbka 10×10 cm, oczka: " + dana("wProbkaO"),
+    "Próbka 10×10 cm, rzędy: " + dana("wProbkaR"),
+    "Waga próbki (g): " + dana("wProbkaG"),
+    "Udział warkoczy: " + dana("wWarkocze"),
+    "Uwagi: " + dana("wUwagi"),
+    "",
+    "PROJEKT: " + nazwaCzysta(),
+    "WZORY (z programu Knit Companion, rząd 1 jest pierwszym rzędem wzoru):" + opisWzorow() + stopkaPromptu()
+  ].join("\n");
+}
+
+function wszystko(){ rysujSledzenie(); rysujProjekt(); rysujUstawienia(); rysujPrompt(); }
 
 function maluj(el){
   if (!el || el.dataset.r === undefined) return;
@@ -500,10 +618,10 @@ $("symTab").onclick = e => { if (e.target.dataset.symdel !== undefined){ if (!zm
 $("symAdd").onclick = () => { if (!zmianaDom()) return; DB.symbole.push({s:"?", n:"nowy symbol"}); zapisz(); wszystko(); };
 
 /* Ustawienia: zapis i wczytanie projektu */
-function nazwaPliku(){
+function nazwaPliku(opis = "", rozsz = ".json"){
   const d = new Date(), z = n => String(n).padStart(2, "0");
-  return nazwaP().replace(/[\\\/:*?"<>|]/g, "-") + " " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
-         " " + z(d.getHours()) + "-" + z(d.getMinutes()) + ".json";
+  return nazwaP().replace(/[\\\/:*?"<>|]/g, "-") + (opis ? " " + opis : "") + " " + d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) +
+         " " + z(d.getHours()) + "-" + z(d.getMinutes()) + rozsz;
 }
 function pobierz(blob, nazwa){
   const a = document.createElement("a");
@@ -511,22 +629,28 @@ function pobierz(blob, nazwa){
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 /* 1) okno zapisu (Edge, Chrome na komputerze)  2) arkusz udostępniania (tylko iPhone i iPad)  3) zwykłe pobranie (np. Safari na Macu) */
-async function zapiszWPlikach(){
+async function zapiszPlik(tekst, nazwa, mime, opis, rozsz){
   const mobilny = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const nazwa = nazwaPliku(), tekst = JSON.stringify(DB), blob = new Blob([tekst], {type:"application/json"});
+  const blob = new Blob([tekst], {type:mime + ";charset=utf-8"});
   try {
     if (window.showSaveFilePicker){
-      const h = await showSaveFilePicker({suggestedName:nazwa, types:[{description:"Projekt Knit Companion", accept:{"application/json":[".json"]}}]});
+      const h = await showSaveFilePicker({suggestedName:nazwa, types:[{description:opis, accept:{[mime]:[rozsz]}}]});
       const w = await h.createWritable(); await w.write(blob); await w.close(); return;
     }
-    if (mobilny) for (const typ of ["application/json", "text/plain"]){
+    if (mobilny) for (const typ of [mime, "text/plain"]){
       const f = new File([tekst], nazwa, {type:typ});
       if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; }
     }
   } catch(e){ if (e && e.name === "AbortError") return; }
   pobierz(blob, nazwa);
 }
+const zapiszWPlikach = () => zapiszPlik(JSON.stringify(DB), nazwaPliku(), "application/json", "Projekt Knit Companion", ".json");
 $("exp").onclick = zapiszWPlikach;
+/* Prompt: zapis odpowiedzi z formularzy (bez pytania o projekt domyślny) i zapis plików .txt */
+const zapiszPole = e => { const id = e.target.dataset.p; if (id){ PR()[id] = e.target.value; zapisz(); } };
+$("prompt").addEventListener("input", zapiszPole); $("prompt").addEventListener("change", zapiszPole);
+$("pgSave").onclick = () => zapiszPlik(promptGrafika(), nazwaPliku("prompt-grafika", ".txt"), "text/plain", "Prompt do ChatGPT", ".txt");
+$("pwSave").onclick = () => zapiszPlik(promptWloczka(), nazwaPliku("prompt-wloczka", ".txt"), "text/plain", "Prompt do ChatGPT", ".txt");
 $("imp").onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   $("impNazwa").textContent = f.name;
