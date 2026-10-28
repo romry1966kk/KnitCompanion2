@@ -195,12 +195,12 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".12",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".13",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
-  maxRzedow: 60,                        // największa liczba rzędów wzoru
+  maxRzedow: 60,                        // największa liczba rzędów wzoru (liczba parzysta, bo rzędy zmieniają się po 2)
   minSzerokoscEdycji: 640,              // na ekranie dotykowym węższym niż tyle pikseli (telefon w pionie) edycja tabeli wzoru jest zablokowana
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
   fotoDomyslne: "img/domyslne.jpg",     // zdjęcie przykładowego projektu
@@ -402,10 +402,17 @@ function maluj(el){
   if (!el || el.dataset.r === undefined) return;
   const w = wzor(); w.rzedy[+el.dataset.r].kom[+el.dataset.c] = pen; el.textContent = pen;
 }
+/* Oczka zmieniają się o 1, rzędy o 2 (wzór ma zawsze parzystą liczbę rzędów, minimum 2).
+   Wzór z nieparzystą liczbą rzędów (ze starszych danych) przy pierwszym naciśnięciu przeskakuje na najbliższą parzystą. */
 function zmienRozmiar(dw, dh){
-  const w = wzor(); if (!w || !mozna(w)) return;
-  w.w = Math.min(USTAWIENIA.maxOczek, Math.max(1, w.w + dw));
-  const h = Math.min(USTAWIENIA.maxRzedow, Math.max(2, w.rzedy.length + dh));
+  const w = wzor(); if (!w) return;
+  const nw = Math.min(USTAWIENIA.maxOczek, Math.max(1, w.w + dw));
+  let h = w.rzedy.length;
+  if (dh) h = (h % 2 === 1) ? h + (dh > 0 ? 1 : -1) : h + dh;
+  h = Math.min(USTAWIENIA.maxRzedow, Math.max(2, h));
+  if (nw === w.w && h === w.rzedy.length) return;                      // nic się nie zmienia: nie pytamy
+  if (!mozna(w)) return;
+  w.w = nw;
   while (w.rzedy.length < h) w.rzedy.push({kom:[], tekst:""});
   w.rzedy.length = h; zapisz(); rysujProjekt();
 }
@@ -472,7 +479,7 @@ $("patDup").onclick = () => { const w = wzor(); if (!w || !zmianaDom()) return;
 $("patDel").onclick = () => { const w = wzor(); if (!w || !confirm("Usunąć wzór „" + w.nazwa + "” razem z jego licznikiem?") || !zmianaDom()) return;
   P().wzory = P().wzory.filter(x => x.id !== w.id); aktWzor = null; zapisz(); wszystko(); };
 $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmienRozmiar(1, 0);
-$("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
+$("hMinus").onclick = () => zmienRozmiar(0, -2); $("hPlus").onclick = () => zmienRozmiar(0, 2);
 $("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
 let maluje = false;
 $("grid").addEventListener("pointerdown", e => {
