@@ -87,6 +87,10 @@ button.on{background:var(--brown);color:var(--bg)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* pasek „obróć telefon”: przykleja się u góry, żeby było go widać przy długiej tabeli */
+#waski{position:sticky;top:8px;z-index:5}
+/* gdy edycja jest zablokowana, tabela nie przechwytuje przewijania palcem */
+#grid.blok .crow{touch-action:auto}
 /* nazwa projektu w zakładce Projekt: jasne tło i ciemny tekst w obu motywach */
 .projinfo{background:#f2b46d;color:#2b2119;border-radius:12px;padding:10px 14px;font-size:17px}
 /* napis między [−] a [+]: stała szerokość, żeby grupy Oczka i Rzędy były równe */
@@ -157,6 +161,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       </div>
       <div class="flex"><button id="patBK" class="tgl" title="Rzędy bez końca"></button></div>
       <div class="flex pal" id="pal"></div>
+      <div class="ostrz" id="waski">Ekran jest za wąski do edycji wzoru. Obróć telefon poziomo. Jeśli ekran się nie obraca, wyłącz blokadę obrotu ekranu.</div>
       <div id="grid"></div>
       <div class="hint">Wybierz symbol i maluj palcem lub myszką. Rząd 1 jest u góry. Rysuj wszystkie rzędy, także powrotne. Instrukcja nad rzędem pokaże się w Śledzeniu.</div>
     </div>
@@ -190,12 +195,13 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".11",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".12",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
   maxRzedow: 60,                        // największa liczba rzędów wzoru
+  minSzerokoscEdycji: 640,              // na ekranie dotykowym węższym niż tyle pikseli (telefon w pionie) edycja tabeli wzoru jest zablokowana
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
   fotoDomyslne: "img/domyslne.jpg",     // zdjęcie przykładowego projektu
   /* Domyślny słownik symboli (symbol = znak w komórce) */
@@ -346,6 +352,9 @@ const zmien = d => { const w = aktywny(); if (!w) return; const R = w.rzedy.leng
    ========================================================= */
 const wzor = () => P().wzory.find(w => w.id === aktWzor) || P().wzory[0];
 /* Wzór z licznikiem większym niż 1 jest w użyciu – przed zmianą pytamy (raz dla wzoru, do odświeżenia strony) */
+/* Telefon w pionie (ekran dotykowy węższy niż próg z USTAWIENIA): edycja tabeli wzoru jest zablokowana */
+const waski = () => matchMedia("(pointer: coarse)").matches && innerWidth < USTAWIENIA.minSzerokoscEdycji;
+let bylWaski = false;
 const zgoda = {};
 function mozna(w){
   if (!w) return false;
@@ -370,9 +379,12 @@ function rysujProjekt(){
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
     + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
+  const blok = waski(); bylWaski = blok;
+  $("grid").className = blok ? "blok" : "";
+  if (!blok) $("waski").style.display = "none";
   let g = "";
   w.rzedy.forEach((r, i) => {
-    g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"></label>`;
+    g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"${blok ? " readonly" : ""}></label>`;
     g += `<div class="erow"><div class="ik">${w.tryb === "powrotny" && i % 2 === 1 ? IK.powrot : ""}</div><div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
     for (let c = 0; c < w.w; c++) g += `<div class="c" data-r="${i}" data-c="${c}">${esc(r.kom[c] || "")}</div>`;
     g += "</div></div>";
@@ -463,8 +475,10 @@ $("wMinus").onclick = () => zmienRozmiar(-1, 0); $("wPlus").onclick = () => zmie
 $("hMinus").onclick = () => zmienRozmiar(0, -1); $("hPlus").onclick = () => zmienRozmiar(0, 1);
 $("pal").onclick = e => { if (e.target.dataset.pen !== undefined){ pen = e.target.dataset.pen; rysujProjekt(); } };
 let maluje = false;
-$("grid").addEventListener("pointerdown", e => { maluje = e.target.dataset.r !== undefined && mozna(wzor()); if (maluje) maluj(e.target); });
-$("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t === undefined) return; if (!mozna(wzor())){ rysujProjekt(); return; } wzor().rzedy[+t].tekst = e.target.value; zapisz(); });
+$("grid").addEventListener("pointerdown", e => {
+  if (waski()){ maluje = false; $("waski").style.display = "block"; return; }     // zablokowane: pokazujemy tylko pasek
+  maluje = e.target.dataset.r !== undefined && mozna(wzor()); if (maluje) maluj(e.target); });
+$("grid").addEventListener("change", e => { const t = e.target.dataset.t; if (t === undefined || waski()) return; if (!mozna(wzor())){ rysujProjekt(); return; } wzor().rzedy[+t].tekst = e.target.value; zapisz(); });
 $("grid").addEventListener("pointermove", e => { if (maluje) maluj(document.elementFromPoint(e.clientX, e.clientY)); });
 window.addEventListener("pointerup", () => { if (maluje){ maluje = false; zapisz(); rysujSledzenie(); } });
 /* Ustawienia: słownik symboli */
@@ -521,6 +535,9 @@ $("defBtn").onclick = () => {
 /* czerwona plakietka, gdy brak internetu */
 const stanSieci = () => $("offline").style.display = navigator.onLine ? "none" : "block";
 addEventListener("online", stanSieci); addEventListener("offline", stanSieci);
+
+/* obrót telefonu lub zmiana rozmiaru: odświeżamy tabelę tylko wtedy, gdy zmienił się stan „wąski” */
+addEventListener("resize", () => { if (DB && waski() !== bylWaski && $("proj").classList.contains("on")) rysujProjekt(); });
 
 /* ===== START ===== */
 document.title = USTAWIENIA.tytul;
