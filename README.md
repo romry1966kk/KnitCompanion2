@@ -37,7 +37,7 @@ Sekcja **Zapis/Odczyt projektu: [nazwa projektu]** zawiera:
 
 - **Zapisz w Plikach**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina.
 - **Wczytaj z pliku** (.json): wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie.
-- **Wczytaj projekt domyślny**: zastępuje bieżący projekt przykładowym.
+- **Reset do domyślnych**: zastępuje bieżący projekt przykładowym.
 - **Nowy projekt**: wpisujesz nazwę i tworzysz pusty projekt.
 - **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje).
 
