@@ -13,18 +13,18 @@
 :root{
   box-sizing:border-box;
   --bg:#f6f0ea; --card:#ece1d6; --ink:#2b2119; --sub:#7a6a5c;
-  --info:#d2691e; --zolty:#7a5200; --zolty-tlo:rgba(214,160,0,.2); --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
+  --info:#d2691e; --zolty:#7a5200; --zolty-tlo:rgba(214,160,0,.2); --czer:#a8463e; --brown:#8a5a36; --on-brown:#fff; --cell:#e9dccf; --cell-now:#f2b46d; --line:#cdb8a4;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --brown:#c98f5c; --on-brown:#1c1511;
+    --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --czer:#e8998f; --brown:#c98f5c; --on-brown:#1c1511;
     --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --brown:#c98f5c; --on-brown:#1c1511;
+  --bg:#1c1511; --card:#2b211a; --ink:#f3e9df; --sub:#b8a493; --info:#ffd9a8; --zolty:#e6c35c; --zolty-tlo:rgba(230,195,92,.14); --czer:#e8998f; --brown:#c98f5c; --on-brown:#1c1511;
   --cell:#33271f; --cell-now:#9a6a31; --line:#4a3a2e; color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -55,6 +55,8 @@ button{min-height:44px}
 button:disabled{opacity:.4;cursor:default}
 /* jednolity wygląd przycisków: nieaktywny = obrys, włączony = pełne tło i tekst w kolorze tła */
 button.on{background:var(--brown);color:var(--bg)}
+/* napisy przycisków usuwających: wyciszona czerwień (nie dotyczy przycisku włączonego) */
+button.czer:not(.on){color:var(--czer)}
 .tgl{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px}
 .sq{width:44px;padding:0;font-size:22px}
 .eq>button{flex:1}
@@ -140,7 +142,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="pattern">
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
-        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" title="Usuń notatkę tego rzędu">Del</button></div>
+        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" class="czer" title="Usuń notatkę tego rzędu">Del</button></div>
         <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz w Plikach).</div>
         <div class="hint" id="legenda" style="text-align:center"></div>
       </div>
@@ -165,7 +167,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <b>Wzory</b>
       <select id="selPat" style="width:100%"></select>
       <label>Nazwa wzoru<input id="patName" placeholder="Nazwa wzoru" style="width:100%"></label>
-      <div class="flex eq"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel">Usuń wzór</button></div>
+      <div class="flex eq"><button id="patNew">Nowy wzór</button><button id="patDup">Duplikuj wzór</button><button id="patDel" class="czer">Usuń wzór</button></div>
       <div class="flex eq" style="margin-top:10px"><button id="trPow" class="tgl"></button><button id="trOkr" class="tgl"></button></div>
       <div class="ostrz" id="uzycie"></div>
       <div class="flex" style="gap:16px">
@@ -187,9 +189,9 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <b id="zapTyt"></b>
       <button id="exp" style="align-self:flex-start">Zapisz w Plikach</button>
       <label class="plik"><span class="fbtn">Wczytaj z pliku</span><span class="fname" id="impNazwa"></span><input type="file" id="imp" accept=".json" hidden></label>
-      <button id="defBtn" style="align-self:flex-start">Reset do domyślnych</button>
+      <button id="defBtn" class="czer" style="align-self:flex-start">Reset do domyślnych</button>
       <div class="flex"><input id="nowaNazwa" placeholder="Nazwa nowego projektu"><button id="projNew">Nowy projekt</button></div>
-      <button id="projDel" style="align-self:flex-start">Usuń projekt</button>
+      <button id="projDel" class="czer" style="align-self:flex-start">Usuń projekt</button>
       <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych i utworzenie nowego projektu zastępują bieżący projekt. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
     </div>
     <div class="card">
@@ -224,7 +226,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".20",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".21",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -438,7 +440,7 @@ function rysujProjekt(){
   $("patInfo").innerHTML = '<option value="">—</option>' + p.wzory.filter(x => x.id !== w.id).map(x => `<option value="${esc(x.id)}">${esc(x.nazwa)} (${liczNotatki(x) || "brak"})</option>`).join("");
   $("wLbl").textContent = w.w; $("hLbl").textContent = w.rzedy.length;
   $("pal").innerHTML = DB.symbole.map(s => `<button data-pen="${esc(s.s)}" class="${s.s === pen ? "on":""}" title="${esc(s.n)}">${esc(s.s)}</button>`).join("")
-    + `<button data-pen="" class="${pen === "" ? "on":""}">gumka</button>`;
+    + `<button data-pen="" class="czer ${pen === "" ? "on":""}">gumka</button>`;
   const blok = waski(); bylWaski = blok;
   $("grid").className = blok ? "blok" : "";
   if (!blok) $("waski").style.display = "none";
@@ -456,7 +458,7 @@ function rysujProjekt(){
 function rysujUstawienia(){
   etykietyProjektu();
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
-    `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button data-symdel="${i}">Usuń</button></div>`).join("");
+    `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button class="czer" data-symdel="${i}">Usuń</button></div>`).join("");
 }
 /* =========================================================
    ZAKŁADKA PROMPT: formularze i pliki .txt do wklejenia w ChatGPT
