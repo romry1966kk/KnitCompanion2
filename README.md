@@ -26,7 +26,7 @@ Program ma trzy zakładki.
 
 - **Nazwa** projektu (tylko informacja; tworzenie, wczytywanie i usuwanie projektów jest w Ustawieniach) oraz opcjonalne **zdjęcie** projektu (.png, .jpg, .jpeg, .webp, .gif, .heic).
 - **Wzory** projektu: **Nowy wzór**, **Duplikuj wzór** i **Usuń wzór**. Każdy wzór ma własny licznik, własną nazwę i tryb (**płasko** lub **na okrągło**, wybierany przyciskami) oraz co najmniej dwa rzędy. Ten sam wzór możesz zduplikować i nazwać inaczej (np. dla prawego i lewego przodu).
-- **Edytor wzoru:** ustawiasz liczbę oczek i rzędów, wybierasz symbol z palety i malujesz palcem lub myszką. Rząd 1 jest u góry. **Rysujesz wszystkie rzędy, także powrotne**, a wzór powtarza się od pierwszego rzędu.
+- **Edytor wzoru:** ustawiasz liczbę oczek (przyciski zmieniają o 1) i rzędów (przyciski zmieniają o 2, wzór ma zawsze parzystą liczbę rzędów, minimum 2), wybierasz symbol z palety i malujesz palcem lub myszką. Rząd 1 jest u góry. **Rysujesz wszystkie rzędy, także powrotne**, a wzór powtarza się od pierwszego rzędu.
 - **Telefon w pionie:** na wąskim ekranie dotykowym edycja tabeli wzoru jest zablokowana (komórki są za małe). Po dotknięciu tabeli pojawia się pasek z prośbą o obrócenie telefonu poziomo (jeśli ekran się nie obraca, trzeba wyłączyć blokadę obrotu). Próg szerokości jest w `USTAWIENIA` (`minSzerokoscEdycji`). Na komputerze i iPadzie blokady nie ma.
 - **Instrukcje:** nad każdym rzędem tabelki jest pole na instrukcję (np. „Powrót: przerabiaj oczka tak, jak schodzą z drutu.”). Pojawia się w panelu w Śledzeniu, gdy ten rząd jest aktywny.
 - **∞ rzędy bez końca** (przycisk pod wierszem z liczbą oczek i rzędów): podświetlony oznacza wzór powtarzany bez końca.
@@ -95,4 +95,4 @@ README.md           ten plik
 
 - To repozytorium jest publiczne. **Nie wrzucaj tu kopii zapasowych ani zdjęć swoich prac.**
 - Program jest udostępniany bez gwarancji. Autor nie odpowiada za utratę danych, dlatego rób kopie zapasowe.
-- Licencja: [uzupełnij]
+- Licencja: wszelkie prawa zastrzeżone. © 2026 Marta Matulewicz. Kod jest publicznie widoczny, ale nie wolno go kopiować, zmieniać ani rozpowszechniać bez zgody autorki.
