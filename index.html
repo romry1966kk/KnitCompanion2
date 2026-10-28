@@ -195,7 +195,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".13",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".14",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -241,16 +241,22 @@ const IK = {
 };
 
 /* Projekt przykładowy: kardigan Marty. Wszystkie pięć wzorów ma cztery rzędy (r2 i r4 to rzędy powrotne);
-   rękawy mają tryb „na okrągło” i gładkie rzędy r2 i r4, reszta ma tryb „powrotny” */
+   rękawy mają tryb „na okrągło” i własny układ rzędów (r1 krzyżuj do przodu, r2 gładki, r3 krzyżuj do tyłu, r4 gładki), reszta ma tryb „powrotny” */
 function dane0(){
   const T1 = "przerabiaj oczka tak, jak schodzą z drutu.";        // w trybie powrotnym program dopisze na początku „Powrót: ”
-  const T2 = "Przerabiaj oczka tak, jak je widzisz.";               // w trybie „na okrągło” nic nie jest dopisywane
+  const T2 = "przerabiaj oczka tak, jak je widzisz.";             // w trybie „na okrągło” nic nie jest dopisywane
   const uk = "\\".repeat(4);
-  const rzedy = rekaw => [
-    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},                                   // r1
-    {kom:[...(rekaw ? "LLPPPPPPPPPPPPLL" : "PPLLLLLLLLLLLLPP")], tekst:rekaw ? T2 : T1},                            // r2
-    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},                                 // r3
-    {kom:[...(rekaw ? "LLPPPPPPPPPPPPLL" : "PPLLLLLLLLLLLLPP")], tekst:rekaw ? T2 : T1}];                           // r4
+  const rzedy = rekaw => rekaw ? [
+    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},   // rękaw r1
+    {kom:[..."LLPPPPPPPPPPPPLL"],       tekst:T2},                                     // rękaw r2
+    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},    // rękaw r3
+    {kom:[..."LLPPPPPPPPPPPPLL"],       tekst:T2}                                      // rękaw r4
+  ] : [
+    {kom:[..."LLPPPP" + uk + "PPPPLL"], tekst:"Krzyżuj 4 środkowe oczka do tyłu."},    // r1
+    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:T1},                                     // r2
+    {kom:[..."LL////PPPPPPPPLL"],       tekst:"Krzyżuj 4 pierwsze oczka do przodu."},  // r3
+    {kom:[..."PPLLLLLLLLLLLLPP"],       tekst:T1}                                      // r4
+  ];
   const wzor = (nazwa, tryb) => ({id:uid(), nazwa, tryb, licznik:1, w:16, bk:true, rzedy:rzedy(tryb === "okragle")});
   return {v:3, symbole:USTAWIENIA.symbole.map(x => ({...x})),
     projekt:{nazwa:"Kardigan z kapturem", dom:true, foto:USTAWIENIA.fotoDomyslne,
