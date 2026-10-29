@@ -142,15 +142,15 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="pattern">
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
-        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" class="czer" title="Usuń notatkę tego rzędu">Del</button></div>
-        <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz w Plikach).</div>
         <div class="hint" id="legenda" style="text-align:center"></div>
+        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" class="czer" title="Usuń notatkę tego rzędu">Del</button></div>
+        <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz dane projektu).</div>
       </div>
     </div>
     <div class="counter">
       <div>AKTUALNY RZĄD</div>
       <button class="big" id="big" title="Dotknij, aby wpisać numer rzędu">1</button>
-      <button class="main-btn" id="next">Ukończyłam rząd</button>
+      <button class="main-btn" id="next">Ukończono rząd</button>
       <button id="prev">Cofnij rząd</button>
     </div>
   </section>
@@ -226,7 +226,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".21",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".22",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
