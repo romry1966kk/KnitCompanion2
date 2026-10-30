@@ -1,0 +1,69 @@
+Jak dodać program Knit Companion na ekran główny (iPad i iPhone)
+
+Robisz to raz na każdym urządzeniu. Potem program otwierasz zawsze z ikony, tak jak zwykłą aplikację.
+
+Adres programu: https://romry1966kk.github.io/KnitCompanion2/
+
+Ważne: użyj przeglądarki Safari (niebieski kompas). Inne przeglądarki mogą nie mieć tej opcji.
+
+Uwaga: w samym programie, obok pola z informacją pod tabelą, jest czerwony przycisk Del. To co innego niż Del (Udostępnij) w Safari. Przycisk Del w programie tylko usuwa notatkę do bieżącego rzędu.
+
+KROK 0 (tylko jeśli już pracowałaś w programie w Safari)
+
+Dane programu w Safari i dane programu z ikony na ekranie głównym to dwa osobne miejsca. Po dodaniu ikony program z ikony będzie na początku pusty (z projektem domyślnym), a Twoje rzędy i notatki zostaną w Safari. Dlatego najpierw przenieś projekt:
+
+1. Otwórz program w Safari (tam, gdzie dotąd pracowałaś).
+2. Dotknij zakładki Ustawienia i przycisku Zapisz dane projektu.
+3. W oknie, które się otworzy, wybierz Arkiver i Filer (Zachowaj w Plikach) i swój folder w iCloud Drive. Zapamiętaj nazwę pliku (to nazwa projektu, data i godzina).
+4. Dodaj ikonę na ekran główny (kroki poniżej).
+5. Otwórz program z nowej ikony. Wejdź w Ustawienia i dotknij Wczytaj dane projektu, wybierz zapisany plik. Program zapyta o potwierdzenie: zatwierdź.
+6. Sprawdź, że licznik i notatki się zgadzają. Od tej chwili pracuj tylko w programie z ikony. Jeśli wrócisz do starej wersji w Safari, dane się rozjadą.
+
+Na iPadzie
+
+1. Otwórz Safari.
+2. W pasku adresu u góry wpisz adres programu (podany wyżej) i potwierdź (Gå / Enter).
+3. Poczekaj, aż program się w pełni załaduje.
+4. Dotknij przycisku Del (Udostępnij): kwadrat ze strzałką w górę, w prawym górnym rogu.
+5. Przewiń listę w dół i wybierz Legg til på Hjem-skjerm (Dodaj do ekranu początkowego). Jeśli nie widzisz tej opcji, dotknij najpierw Mer (Więcej).
+6. W polu Navn (Nazwa) wpisz nazwę ikony, np. "Druty".
+7. Jeśli widzisz przełącznik Åpne som nettapp (Otwórz jako aplikację internetową), zostaw go włączony. Wyłączony zrobi z ikony zwykłą zakładkę, która otwiera Safari, i wtedy dane będą w Safari.
+8. Dotknij Legg til (Dodaj) w prawym górnym rogu.
+9. Na ekranie głównym pojawi się ikona programu.
+
+Na iPhonie
+
+1. Otwórz Safari.
+2. Wpisz adres programu (podany wyżej) i potwierdź.
+3. Poczekaj, aż strona się załaduje.
+4. Dotknij przycisku Del (Udostępnij): kwadrat ze strzałką, na dolnym pasku. Jeśli go nie ma, dotknij trzech kropek ··· (Mer) na dolnym pasku, a potem Del.
+5. Przewiń w dół i wybierz Legg til på Hjem-skjerm. Jeśli nie widzisz tej opcji, dotknij Mer.
+6. W polu Navn wpisz nazwę, np. "Druty".
+7. Zostaw włączone Åpne som nettapp (jeśli ta opcja jest widoczna).
+8. Dotknij Legg til.
+
+Zasady, żeby nie stracić danych
+
+Program otwieraj tylko z tej ikony. Jeśli otworzysz go z innego miejsca (inny link, Safari, plik z aplikacji Filer, inna przeglądarka), zobaczysz pusty program bez swoich projektów. To normalne, dane są wtedy po prostu w innym miejscu.
+
+Ikona na iPadzie i ikona na iPhonie to dwa osobne zestawy danych. Przenoszenie między urządzeniami odbywa się przez zapis i wczytanie pliku z projektem (Zapisz dane projektu i Wczytaj dane projektu w zakładce Ustawienia). To jest kopia z chwili zapisu, a nie synchronizacja: zmiany po obu stronach nie scalają się same.
+
+Regularnie zapisuj kopię projektu: Ustawienia, Zapisz dane projektu, potem Arkiver i Filer (Zachowaj w Plikach) i swój folder w iCloud Drive. Zapisuj zawsze przed Wczytaj dane projektu, przed Reset do domyślnych i przed usunięciem projektu.
+
+Gdy zmienisz coś w polu z informacją pod tabelą (np. "-2" przy rzędzie), pod tym polem pojawi się żółty napis z przypomnieniem o zapisie. Znika po zapisie projektu do pliku. Nie jest to błąd, tylko przypomnienie, żeby notatki nie zginęły.
+
+Uważaj na czerwone napisy w programie: Reset do domyślnych, Usuń projekt, Usuń wzór, Usuń (w słowniku symboli), gumka i Del. Reset do domyślnych, Usuń projekt i Wczytaj dane projektu zastępują lub kasują cały projekt razem z licznikami i notatkami (program pyta o potwierdzenie).
+
+Nie usuwaj ikony programu z ekranu głównego i nie usuwaj danych witryn Safari (Innstillinger, potem Apper, Safari, Fjern historikk og nettstedsdata). Może to skasować dane programu. Jeśli musisz to zrobić, najpierw zapisz kopię projektu do pliku.
+
+Dobrze wiedzieć
+
+Program potrzebuje internetu, żeby się uruchomić z ikony. Gdy urządzenie nie ma sieci, program pokazuje czerwoną plakietkę OFFLINE, a po zamknięciu bez internetu może się nie uruchomić ponownie. Dane zapisują się na urządzeniu, więc samo dzierganie przy chwilowym braku internetu nie jest problemem, dopóki program jest otwarty.
+
+Na iPhonie edycja wzoru (malowanie tabeli w zakładce Projekt) działa tylko wtedy, gdy telefon jest obrócony poziomo. W pionie program pokazuje pasek z prośbą o obrócenie. Jeśli ekran się nie obraca, wyłącz blokadę obrotu ekranu w Centrum sterowania. Śledzenie rzędów działa normalnie w obu pozycjach. Na iPadzie wszystko działa w obu pozycjach.
+
+Numer wersji programu jest w stopce na dole (np. v 2.0.22). Po aktualizacji sprawdź, czy numer się zmienił.
+
+Jeśli program się nie zmienia po aktualizacji: zamknij program całkowicie (przesuń go w górę w przełączniku aplikacji) i otwórz ponownie z ikony. Jeśli numer w stopce nadal jest stary, poczekaj kilka minut (nowa wersja pojawia się z opóźnieniem) i spróbuj jeszcze raz.
+
+Nazwy menu mogą się minimalnie różnić zależnie od wersji iOS. Jeśli zobaczysz inne słowa, kieruj się ikonami i opisami w nawiasach.
