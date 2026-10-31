@@ -79,8 +79,7 @@ button.czer:not(.on){color:var(--czer)}
 .card{background:var(--card);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .flex>input{flex:1}
-/* pole nazwy projektu: najmniejsza szerokość 260 px; gdy przyciski się nie mieszczą obok, schodzą do drugiej linii (zamiast ściskać pole do kilku liter) */
-#nowaNazwa{flex:1 1 260px}
+
 .pal button{min-width:44px;font-size:18px;font-weight:700}
 #grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
 #grid label{margin-top:8px}
@@ -199,9 +198,9 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <div class="hint" id="ostatniZapis"></div>
       <label class="plik"><span class="fbtn">Wczytaj dane projektu</span><span class="fname" id="impNazwa"></span><input type="file" id="imp" accept=".json" hidden></label>
       <button id="defBtn" class="czer" style="align-self:flex-start">Reset do domyślnych</button>
-      <div class="flex"><input id="nowaNazwa" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button><button id="projRen">Zmień nazwę</button></div>
-      <div class="flex"><button id="projDup">Duplikuj projekt</button><button id="projDel" class="czer">Usuń projekt</button></div>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych, nowy projekt i duplikat zastępują bieżący projekt (program pyta, czy zapisać go wcześniej do pliku). Pole nazwy służy do nowego projektu, duplikatu (puste = „(kopia)”) i zmiany nazwy. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
+      <label>Nazwa projektu<input id="projNazwa" placeholder="Nazwa projektu" autocomplete="off" style="width:100%"></label>
+      <div class="flex eq"><button id="projNew">Nowy projekt</button><button id="projDup">Duplikuj projekt</button><button id="projDel" class="czer">Usuń projekt</button></div>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych, nowy projekt, duplikat i usunięcie projektu pytają, czy zapisać bieżący projekt do pliku. Nazwę projektu zmieniasz bezpośrednio w polu (dopisek „(domyślny)” to tylko oznaczenie). Nowy projekt dostaje nazwę „Nowy projekt”, a duplikat „… (kopia)”. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
     </div>
     <div class="card">
       <b>Słownik symboli</b>
@@ -264,7 +263,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".25",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".26",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
@@ -496,7 +495,7 @@ function rysujProjekt(){
   $("grid").innerHTML = g;
 }
 function rysujUstawienia(){
-  etykietyProjektu(); odswiezZapis();
+  etykietyProjektu(); odswiezZapis(); $("projNazwa").value = nazwaP();
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input name="symbol-${i + 1}-znak" autocomplete="off" data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input name="symbol-${i + 1}-nazwa" autocomplete="off" data-sy="${i}" data-f="n" value="${esc(s.n)}"><button class="czer" data-symdel="${i}">Usuń</button></div>`).join("");
 }
@@ -654,35 +653,34 @@ function resetPlikow(){ $("impNazwa").textContent = TXT_JSON; $("fotoNazwa").tex
 $("photoIn").onchange = e => { const f = e.target.files[0]; if (!f) return;
   if (!zmianaDom()){ e.target.value = ""; return; }
   $("fotoNazwa").textContent = f.name; wczytajFoto(f); };
-/* Ustawienia: nowy i usunięty projekt */
+/* Ustawienia: nowy, duplikat, zmiana nazwy i usunięcie projektu. Nazwę zmieniasz w polu „Nazwa projektu”. */
 $("projNew").onclick = () => {
-  const nazwa = ($("nowaNazwa").value || "").trim();
-  if (!nazwa){ alert("Wpisz nazwę nowego projektu."); return; }
-  pytajZastap("Nowy projekt „" + nazwa + "”", "Zostanie utworzony pusty projekt.", () => {
-    DB.projekt = {nazwa, foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+  pytajZastap("Nowy projekt", "Zostanie utworzony pusty projekt o nazwie „Nowy projekt” (nazwę zmienisz w polu).", () => {
+    DB.projekt = {nazwa:"Nowy projekt", foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
   });
 };
 /* Duplikuj projekt: kopia wszystkiego z bieżącego projektu (wzory, instrukcje, notatki Info, zdjęcie, dane Prompt) z licznikami od 1; zastępuje bieżący projekt */
 $("projDup").onclick = () => {
   if (!P().wzory.length){ alert("Brak projektu do skopiowania."); return; }
-  const nazwa = ($("nowaNazwa").value || "").trim() || (nazwaCzysta() + " (kopia)");
+  const nazwa = nazwaCzysta() + " (kopia)";
   pytajZastap("Duplikat projektu „" + nazwa + "”", "Zostanie utworzona kopia bieżącego projektu z wyzerowanymi licznikami.", () => {
     const k = JSON.parse(JSON.stringify(P()));
     k.nazwa = nazwa; delete k.dom; delete k.ostatniZapis; k.infoBrudne = false;
     k.wzory.forEach(w => { w.licznik = 1; w.id = uid(); });
-    DB.projekt = k; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+    DB.projekt = k; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
   });
 };
-/* Zmień nazwę: tylko nazwa, bez pytań i bez zastępowania danych */
-$("projRen").onclick = () => {
-  if (!P().wzory.length){ alert("Brak projektu do zmiany nazwy."); return; }
-  const nazwa = ($("nowaNazwa").value || "").trim();
-  if (!nazwa){ alert("Wpisz nową nazwę projektu."); return; }
-  P().nazwa = nazwa; P().dom = false; $("nowaNazwa").value = ""; zapisz(); wszystko();
+/* Zmiana nazwy bezpośrednio w polu: bez pytań, dane bez zmian. Dopisek „(domyślny)”/„(zmieniony)” to tylko oznaczenie i jest ucinany. */
+$("projNazwa").onchange = e => {
+  const wpis = e.target.value.trim();
+  if (!P().wzory.length){ alert("Brak projektu do zmiany nazwy."); e.target.value = nazwaP(); return; }
+  if (!wpis || wpis === nazwaP()){ e.target.value = nazwaP(); return; }          // pusta nazwa lub bez zmian
+  P().nazwa = wpis.replace(/ \((domyślny|zmieniony)\)$/, "") || P().nazwa; P().dom = false; zapisz(); wszystko();
 };
 $("projDel").onclick = () => {
-  if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje." + ostrzInfo())) return;
-  DB.projekt = {nazwa:"(brak projektu)", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
+  pytajZastap("Usunięcie projektu", "Projekt zostanie usunięty z programu. Zapisany wcześniej plik zostaje.", () => {
+    DB.projekt = {nazwa:"(brak projektu)", foto:"", wzory:[]}; DB.ap = null; aktWzor = null; resetPlikow(); zapisz(); wszystko();
+  }, null, {czasownik:"usunięty", zapisz:"Zapisz dane i usuń", bez:"Usuń bez zapisu"});
 };
 /* Projekt: wzory */
 $("selPat").onchange = e => { aktWzor = e.target.value; rysujProjekt(); };
@@ -753,9 +751,11 @@ function odswiezZapis(){
 }
 /* Wspólne okno przed akcjami, które zastępują bieżący projekt: Zapisz dane i kontynuuj / Kontynuuj bez zapisu / Anuluj */
 let zastapAkcja = null, zastapAnuluj = null;
-function pytajZastap(tytul, opis, akcja, anuluj){
+function pytajZastap(tytul, opis, akcja, anuluj, jak){
+  jak = jak || {};
   $("zastapTyt").textContent = tytul;
-  $("zastapOpis").textContent = opis + " Bieżący projekt „" + nazwaP() + "” zostanie zastąpiony. Jeśli chcesz go zachować, zapisz go teraz do pliku." + (maNotatki() ? " Bez zapisu notatki Info tego projektu zostaną utracone." : "");
+  $("zastapOpis").textContent = opis + " Bieżący projekt „" + nazwaP() + "” zostanie " + (jak.czasownik || "zastąpiony") + ". Jeśli chcesz go zachować, zapisz go teraz do pliku." + (maNotatki() ? " Bez zapisu notatki Info tego projektu zostaną utracone." : "");
+  $("zastapZapisz").textContent = jak.zapisz || "Zapisz dane i kontynuuj"; $("zastapBez").textContent = jak.bez || "Kontynuuj bez zapisu";
   zastapAkcja = akcja; zastapAnuluj = anuluj || null; $("zastapOkno").style.display = "flex";
 }
 /* Zapis projektu: po zapisie znika przypomnienie o niezapisanych danych Info (chyba że klikniesz Anuluj) */
