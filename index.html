@@ -89,6 +89,10 @@ button.czer:not(.on){color:var(--czer)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* okno wyboru przed otwarciem instrukcji */
+.okno{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;z-index:50}
+.okno-karta{max-width:420px;width:100%;display:flex;flex-direction:column;gap:12px}
+.okno-przyciski{display:flex;flex-direction:column;gap:8px}
 /* pole Info w Śledzeniu */
 .inforow{display:flex;gap:8px;align-items:stretch;margin-top:8px}
 #infoPole{flex:1;min-width:0}
@@ -143,7 +147,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
         <div class="instr" id="instr"></div>
         <div id="chart"></div>
         <div class="hint" id="legenda" style="text-align:center"></div>
-        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" class="czer" title="Usuń notatkę tego rzędu">Del</button></div>
+        <div class="inforow"><input id="infoPole" placeholder="Informacja dla tego rzędu" aria-label="Informacja dla tego rzędu" autocomplete="off"><button id="infoDel" class="czer" title="Usuń notatkę tego rzędu">Usuń</button></div>
         <div class="hint" id="infoZapis" style="display:none">Zmieniono dane Info. Zapisz projekt do pliku (Ustawienia → Zapisz dane projektu).</div>
       </div>
     </div>
@@ -200,6 +204,11 @@ footer{text-align:center;color:var(--sub);font-size:14px}
       <button id="symAdd">Dodaj symbol</button>
       <div class="hint">Słownik zapisuje się razem z projektem. Zmiana samego znaku zmienia sens narysowanych wzorów.</div>
     </div>
+    <div class="card" id="pomocKarta" style="display:none">
+      <b>Pomoc</b>
+      <button id="pomocBtn" style="align-self:flex-start">Dodaj program na ekran główny</button>
+      <div class="hint">Instrukcja jest potrzebna tylko raz na każdym urządzeniu. Ikona na ekranie głównym ma osobne dane, więc najpierw zapisz projekt do pliku.</div>
+    </div>
   </section>
 
   <!-- ===== ZAKŁADKA 4: PROMPT (pliki .txt do wklejenia w ChatGPT: grafika wzoru i szacunek włóczki) ===== -->
@@ -220,18 +229,31 @@ footer{text-align:center;color:var(--sub);font-size:14px}
   <footer id="stopka"></footer>
 </main>
 
+<!-- okno wyboru przed otwarciem instrukcji (trzy wyjścia, więc własne okno zamiast confirm) -->
+<div id="pomocOkno" class="okno" style="display:none">
+  <div class="card okno-karta">
+    <b>Dodanie programu na ekran główny</b>
+    <div>Program z ikony na ekranie głównym ma własne, osobne dane i na początku pokaże projekt domyślny. Żeby nie stracić swojego projektu, zapisz go teraz do pliku, a po dodaniu ikony wczytaj go w programie z ikony (Wczytaj dane projektu). Otworzy się instrukcja.</div>
+    <div class="okno-przyciski">
+      <button id="pomocZapisz" class="tgl on">Zapisz dane i otwórz instrukcję</button>
+      <button id="pomocBez">Mam już kopię, otwórz instrukcję</button>
+      <button id="pomocAnuluj">Anuluj</button>
+    </div>
+  </div>
+</div>
 <script>
 /* =========================================================
    USTAWIENIA GŁÓWNE – tutaj zmieniasz najważniejsze rzeczy
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".22",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".23",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
   maxRzedow: 60,                        // największa liczba rzędów wzoru (liczba parzysta, bo rzędy zmieniają się po 2)
+  pomocZawsze: false,                  // true = karta Pomoc (instrukcja dodania na ekran główny) widoczna zawsze, także na komputerze (do testów)
   minSzerokoscEdycji: 640,              // na ekranie dotykowym węższym niż tyle pikseli (telefon w pionie) edycja tabeli wzoru jest zablokowana
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
   fotoDomyslne: "img/domyslne.jpg",     // zdjęcie przykładowego projektu
@@ -448,7 +470,7 @@ function rysujProjekt(){
   /* Tabela jest odwrócona: na górze najwyższy rząd, na dole rząd 1 (dane i numeracja bez zmian, odwrócone jest tylko rysowanie) */
   for (let i = w.rzedy.length - 1; i >= 0; i--){
     const r = w.rzedy[i];
-    g += `<label>Rząd ${i + 1} – instrukcje:<input data-t="${i}" value="${esc(r.tekst)}"${blok ? " readonly" : ""}></label>`;
+    g += `<label>Rząd ${i + 1} – instrukcje:<input name="instrukcja-${i + 1}" autocomplete="off" data-t="${i}" value="${esc(r.tekst)}"${blok ? " readonly" : ""}></label>`;
     g += `<div class="erow"><div class="ik">${w.tryb === "powrotny" && i % 2 === 1 ? IK.powrot : ""}</div><div class="crow" style="grid-template-columns:repeat(${w.w},1fr)">`;
     for (let c = 0; c < w.w; c++) g += `<div class="c" data-r="${i}" data-c="${c}">${esc(r.kom[c] || "")}</div>`;
     g += "</div></div>";
@@ -458,7 +480,7 @@ function rysujProjekt(){
 function rysujUstawienia(){
   etykietyProjektu();
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
-    `<div class="flex"><input data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input data-sy="${i}" data-f="n" value="${esc(s.n)}"><button class="czer" data-symdel="${i}">Usuń</button></div>`).join("");
+    `<div class="flex"><input name="symbol-${i + 1}-znak" autocomplete="off" data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input name="symbol-${i + 1}-nazwa" autocomplete="off" data-sy="${i}" data-f="n" value="${esc(s.n)}"><button class="czer" data-symdel="${i}">Usuń</button></div>`).join("");
 }
 /* =========================================================
    ZAKŁADKA PROMPT: formularze i pliki .txt do wklejenia w ChatGPT
@@ -488,8 +510,8 @@ const POLA = {
 function poleHTML(f){
   const v = String(PR()[f.id] || "");
   let el;
-  if (f.opc) el = `<select data-p="${f.id}"><option value="">${NIE_PODANO}</option>` + f.opc.map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("") + "</select>";
-  else el = `<input data-p="${f.id}" value="${esc(v)}"${f.num ? ' type="number" inputmode="decimal" min="0"' : ""}${f.lista ? ` list="dl_${f.id}"` : ""}>`
+  if (f.opc) el = `<select name="${f.id}" autocomplete="off" data-p="${f.id}"><option value="">${NIE_PODANO}</option>` + f.opc.map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("") + "</select>";
+  else el = `<input name="${f.id}" autocomplete="off" data-p="${f.id}" value="${esc(v)}"${f.num ? ' type="number" inputmode="decimal" min="0"' : ""}${f.lista ? ` list="dl_${f.id}"` : ""}>`
     + (f.lista ? `<datalist id="dl_${f.id}">` + f.lista.map(o => `<option value="${esc(o)}">`).join("") + "</datalist>" : "");
   return `<label>${esc(f.et)}${el}</label>`;
 }
@@ -688,6 +710,7 @@ async function zapiszWPlikach(){
   const ok = await zapiszPlik(JSON.stringify(DB), nazwaPliku(), "application/json", "Projekt Knit Companion", ".json");
   if (ok) zapisz(); else P().infoBrudne = bylo;
   pokazZapis();
+  return ok;
 }
 $("exp").onclick = zapiszWPlikach;
 /* Info: kopiowanie notatek z innego wzoru (pytanie tylko przy nadpisaniu) i wpisywanie notatki w Śledzeniu */
@@ -707,6 +730,14 @@ $("infoDel").onclick = () => { const w = aktywny(); if (!w) return; zapiszNotatk
 const zapiszPole = e => { const id = e.target.dataset.p; if (id){ PR()[id] = e.target.value; zapisz(); } };
 $("prompt").addEventListener("input", zapiszPole); $("prompt").addEventListener("change", zapiszPole);
 $("pgSave").onclick = () => zapiszPlik(promptGrafika(), nazwaPliku("prompt-grafika", ".txt"), "text/plain", "Prompt do ChatGPT", ".txt");
+/* Pomoc: widoczna tylko na iPhonie/iPadzie w zwykłej karcie Safari (w programie z ikony i na komputerze niepotrzebna; USTAWIENIA.pomocZawsze = do testów) */
+const naIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const zIkony = () => navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+if (USTAWIENIA.pomocZawsze || (naIOS() && !zIkony())) $("pomocKarta").style.display = "";
+$("pomocBtn").onclick = () => { $("pomocOkno").style.display = "flex"; };
+$("pomocAnuluj").onclick = () => { $("pomocOkno").style.display = "none"; };
+$("pomocBez").onclick = () => { location.href = "info.html"; };
+$("pomocZapisz").onclick = async () => { $("pomocOkno").style.display = "none"; if (await zapiszWPlikach()) location.href = "info.html"; };   // Anuluj w oknie zapisu: zostajemy w programie
 $("pwSave").onclick = () => zapiszPlik(promptWloczka(), nazwaPliku("prompt-wloczka", ".txt"), "text/plain", "Prompt do ChatGPT", ".txt");
 $("imp").onchange = e => {
   const f = e.target.files[0]; if (!f) return;
