@@ -6,33 +6,32 @@
     <title>Jak dodać program Knit Companion na ekran główny</title>
     <style>
         :root {
-            --bg-color: #f5f5f7;
-            --card-bg: #ffffff;
-            --text-main: #1d1d1f;
-            --text-secondary: #515154;
-            --accent: #0066cc;
-            --accent-hover: #004499;
-            --warning-bg: #fff9e6;
-            --warning-border: #ffcc00;
-            --danger-bg: #fff2f2;
-            --danger-border: #ff3b30;
-            --border-color: #d2d2d7;
+            color-scheme: light dark;
+            --bg-color: #f6f0ea;
+            --card-bg: #ece1d6;
+            --text-main: #2b2119;
+            --text-secondary: #6a5a4c;
+            --accent: #8a5a36;
+            --warning-bg: rgba(214, 160, 0, 0.2);
+            --warning-border: #c99700;
+            --danger-bg: rgba(168, 70, 62, 0.12);
+            --danger-border: #a8463e;
+            --border-color: #cdb8a4;
             --radius: 12px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #000000;
-                --card-bg: #1c1c1e;
-                --text-main: #f5f5f7;
-                --text-secondary: #a1a1a6;
-                --accent: #0a84ff;
-                --accent-hover: #409cff;
-                --warning-bg: #2c2516;
-                --warning-border: #997a00;
-                --danger-bg: #2c1a1a;
-                --danger-border: #ff453a;
-                --border-color: #38383a;
+                --bg-color: #1c1511;
+                --card-bg: #2b211a;
+                --text-main: #f3e9df;
+                --text-secondary: #b8a493;
+                --accent: #c98f5c;
+                --warning-bg: rgba(230, 195, 92, 0.14);
+                --warning-border: #b99a3d;
+                --danger-bg: rgba(232, 153, 143, 0.12);
+                --danger-border: #e8998f;
+                --border-color: #4a3a2e;
             }
         }
 
@@ -70,7 +69,6 @@
             border-radius: var(--radius);
             padding: 20px 24px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
         }
 
@@ -106,6 +104,17 @@
             font-weight: bold;
         }
 
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg-color);
+            padding: 12px 18px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+
         .warning {
             background-color: var(--warning-bg);
             border-left: 4px solid var(--warning-border);
@@ -123,14 +132,6 @@
             margin: 16px 0;
             font-size: 0.95rem;
         }
-
-        .tip {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 16px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-        }
     </style>
 </head>
 <body>
@@ -140,18 +141,24 @@
     <h1>Jak dodać program Knit Companion na ekran główny</h1>
     <p class="subtitle">Instrukcja dla systemów iPadOS i iOS. Robisz to raz na każdym urządzeniu – potem program otwierasz zawsze z ikony, tak jak zwykłą aplikację.</p>
 
+    <div class="card" style="border-color: var(--accent);">
+        <h2>Zanim zaczniesz</h2>
+        <p>To jest tylko instrukcja. Ikonę dodajesz <strong>z programu</strong>, a nie z tej strony: przeczytaj kroki, wróć do programu i dopiero tam dotknij <strong>Del (Udostępnij)</strong>. Jeśli otworzyłaś tę stronę z programu (przycisk <strong>Pomoc</strong> w Ustawieniach), jesteś już w Safari: kroki 1–3 poniżej możesz pominąć i zacząć od kroku 4.</p>
+        <a class="btn" href="./">← Wróć do programu</a>
+    </div>
+
     <div class="card">
         <h2>Adres programu</h2>
         <div class="link-box">
-            <a href="https://romry1966kk.github.io/KnitCompanion2/" target="_blank">https://romry1966kk.github.io/KnitCompanion2/</a>
+            <a href="https://romry1966kk.github.io/KnitCompanion2/" >https://romry1966kk.github.io/KnitCompanion2/</a>
         </div>
         <p><strong>Ważne:</strong> Użyj przeglądarki <strong>Safari</strong> (niebieski kompas). Inne przeglądarki mogą nie mieć potrzebnej opcji.</p>
-        <p><em>Uwaga:</em> w samym programie, obok pola z informacją pod tabelą, jest czerwony przycisk Del. To co innego niż Del (Udostępnij) w Safari. Przycisk Del w programie tylko usuwa notatkę do bieżącego rzędu.</p>
     </div>
 
     <div class="card" style="border-color: var(--accent);">
         <h2>KROK 0 (tylko jeśli już pracowałaś w programie w Safari)</h2>
-        <p>Dane programu w Safari i dane programu z ikony na ekranie głównym to dwa osobne miejsca. Po dodaniu ikony program z ikony będzie na początku pusty (z projektem domyślnym), a Twoje rzędy i notatki zostaną w Safari. Dlatego najpierw przenieś projekt:</p>
+        <p>Dane programu w Safari i dane programu z ikony na ekranie głównym to dwa osobne miejsca. Po dodaniu ikony program z ikony pokaże na początku projekt domyślny (liczniki od początku), a Twoje rzędy i notatki zostaną w Safari. Dlatego najpierw przenieś projekt:</p>
+        <p>Jeśli w programie dotknęłaś <strong>Zapisz dane i otwórz instrukcję</strong>, kroki 1–3 poniżej masz już za sobą.</p>
         <ol>
             <li>Otwórz program w Safari (tam, gdzie dotąd pracowałaś).</li>
             <li>Dotknij zakładki <strong>Ustawienia</strong> i przycisku <strong>Zapisz dane projektu</strong>.</li>
@@ -194,7 +201,7 @@
     <div class="warning">
         <strong>Zasady, żeby nie stracić danych:</strong>
         <ul>
-            <li>Program otwieraj <strong>tylko z tej ikony</strong>. Jeśli otworzysz go z innego miejsca (inny link, Safari, plik z aplikacji Filer, inna przeglądarka), zobaczysz pusty program bez swoich projektów. To normalne, dane są wtedy po prostu w innym miejscu.</li>
+            <li>Program otwieraj <strong>tylko z tej ikony</strong>. Jeśli otworzysz go z innego miejsca (inny link, Safari, plik z aplikacji Filer, inna przeglądarka), zobaczysz projekt domyślny zamiast swojego (liczniki od początku). To normalne, Twoje dane są wtedy po prostu w innym miejscu.</li>
             <li>Ikona na iPadzie i ikona na iPhonie to dwa osobne zestawy danych. Przenoszenie między urządzeniami odbywa się przez zapis i wczytanie pliku z projektem (<em>Zapisz dane projektu</em> i <em>Wczytaj dane projektu</em> w zakładce Ustawienia). To jest kopia z chwili zapisu, a nie synchronizacja.</li>
             <li>Regularnie zapisuj kopię projektu: Ustawienia -> Zapisz dane projektu -> Arkiver i Filer (Zachowaj w Plikach) w iCloud Drive. Zapisuj zawsze przed wczytaniem danych, przed resetem i przed usunięciem projektu.</li>
             <li>Gdy zmienisz coś w polu z informacją pod tabelą (np. "-2" przy rzędzie), pod tym polem pojawi się żółty napis z przypomnieniem o zapisie. Znika po zapisie projektu do pliku.</li>
@@ -203,7 +210,7 @@
 
     <div class="danger">
         <strong>Uważaj na czerwone napisy w programie:</strong>
-        <p>Reset do domyślnych, Usuń projekt, Usuń wzór, Usuń (w słowniku symboli), gumka i Del. Reset do domyślnych, Usuń projekt i Wczytaj dane projektu zastępują lub kasują cały projekt razem z licznikami i notatkami (program pyta o potwierdzenie).</p>
+        <p>Reset do domyślnych, Usuń projekt, Usuń wzór, Usuń (w słowniku symboli i obok pola z informacją pod tabelą) oraz gumka. Reset do domyślnych, Usuń projekt i Wczytaj dane projektu zastępują lub kasują cały projekt razem z licznikami i notatkami (program pyta o potwierdzenie).</p>
         <p style="margin-bottom: 0;"><strong>Nie usuwaj ikony programu</strong> z ekranu głównego i nie usuwaj danych witryn Safari (<em>Innstillinger -> Apper -> Safari -> Fjern historikk og nettstedsdata</em>). Może to skasować dane programu. Jeśli musisz to zrobić, najpierw zapisz kopię projektu do pliku.</p>
     </div>
 
@@ -212,14 +219,12 @@
         <ul>
             <li><strong>Internet:</strong> Program potrzebuje internetu, żeby się uruchomić z ikony. Gdy urządzenie nie ma sieci, program pokazuje czerwoną plakietkę OFFLINE, a po zamknięciu bez internetu może się nie uruchomić ponownie. Dane zapisują się lokalnie, więc samo dzierganie przy chwilowym braku internetu nie jest problemem, dopóki program jest otwarty.</li>
             <li><strong>Obracanie ekranu na iPhonie:</strong> Edycja wzoru (malowanie tabeli w zakładce Projekt) działa tylko wtedy, gdy telefon jest obrócony poziomo. W pionie program pokazuje pasek z prośbą o obrócenie. Jeśli ekran się nie obraca, wyłącz blokadę obrotu ekranu w Centrum sterowania. Śledzenie rzędów działa normalnie w obu pozycjach (na iPadzie wszystko działa w obu pozycjach).</li>
-            <li><strong>Aktualizacje:</strong> Numer wersji programu jest w stopce na dole (np. v 2.0.22). Po aktualizacji sprawdź, czy numer się zmienił. Jeśli program się nie zmienia: zamknij go całkowicie (przesuń w górę w przełączniku aplikacji) i otwórz ponownie z ikony. Jeśli numer nadal jest stary, poczekaj kilka minut i spróbuj ponownie.</li>
+            <li><strong>Aktualizacje:</strong> Numer wersji programu jest w stopce na dole (w formacie v 2.0.xx). Po aktualizacji sprawdź, czy numer się zmienił. Jeśli program się nie zmienia: zamknij go całkowicie (przesuń w górę w przełączniku aplikacji) i otwórz ponownie z ikony. Jeśli numer nadal jest stary, poczekaj kilka minut i spróbuj ponownie.</li>
             <li>Nazwy menu mogą się minimalnie różnić zależnie od wersji iOS. Jeśli zobaczysz inne słowa, kieruj się ikonami i opisami w nawiasach.</li>
         </ul>
-        
-        <div class="tip">
-            Instrukcja przygotowana z myślą o czytelności na ekranach Retina (iPhone oraz iPad).
-        </div>
     </div>
+
+    <p><a class="btn" href="./">← Wróć do programu</a></p>
 
 </div>
 
