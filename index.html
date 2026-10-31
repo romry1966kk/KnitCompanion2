@@ -89,6 +89,8 @@ button.czer:not(.on){color:var(--czer)}
 .tgl svg,.ik svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ostrz{display:none;background:var(--cell-now);color:var(--ink);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
 .hint{color:var(--sub);font-size:14px}
+/* linijka „Ostatni zapis do pliku” (żółta, gdy dawno nie zapisywano) */
+.zolty{color:var(--zolty);background:var(--zolty-tlo);border-radius:8px;padding:6px 10px;font-weight:600}
 /* okno wyboru przed otwarciem instrukcji */
 .okno{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;z-index:50}
 .okno-karta{max-width:420px;width:100%;display:flex;flex-direction:column;gap:12px}
@@ -192,11 +194,12 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     <div class="card">
       <b id="zapTyt"></b>
       <button id="exp" style="align-self:flex-start">Zapisz dane projektu</button>
+      <div class="hint" id="ostatniZapis"></div>
       <label class="plik"><span class="fbtn">Wczytaj dane projektu</span><span class="fname" id="impNazwa"></span><input type="file" id="imp" accept=".json" hidden></label>
       <button id="defBtn" class="czer" style="align-self:flex-start">Reset do domyślnych</button>
-      <div class="flex"><input id="nowaNazwa" placeholder="Nazwa nowego projektu"><button id="projNew">Nowy projekt</button></div>
-      <button id="projDel" class="czer" style="align-self:flex-start">Usuń projekt</button>
-      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych i utworzenie nowego projektu zastępują bieżący projekt. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
+      <div class="flex"><input id="nowaNazwa" placeholder="Nazwa projektu"><button id="projNew">Nowy projekt</button><button id="projRen">Zmień nazwę</button></div>
+      <div class="flex"><button id="projDup">Duplikuj projekt</button><button id="projDel" class="czer">Usuń projekt</button></div>
+      <div class="hint">Zapisz plik w aplikacji Pliki (iCloud Drive). Wczytanie pliku, reset do domyślnych, nowy projekt i duplikat zastępują bieżący projekt (program pyta, czy zapisać go wcześniej do pliku). Pole nazwy służy do nowego projektu, duplikatu (puste = „(kopia)”) i zmiany nazwy. Projekt domyślny jest wbudowany w program: zmiany w jego kodzie widać dopiero po „Reset do domyślnych”.</div>
     </div>
     <div class="card">
       <b>Słownik symboli</b>
@@ -241,18 +244,31 @@ footer{text-align:center;color:var(--sub);font-size:14px}
     </div>
   </div>
 </div>
+<!-- wspólne okno przed akcjami zastępującymi bieżący projekt (nowy, duplikat, wczytanie, reset) -->
+<div id="zastapOkno" class="okno" style="display:none">
+  <div class="card okno-karta">
+    <b id="zastapTyt"></b>
+    <div id="zastapOpis"></div>
+    <div class="okno-przyciski">
+      <button id="zastapZapisz" class="tgl on">Zapisz dane i kontynuuj</button>
+      <button id="zastapBez">Kontynuuj bez zapisu</button>
+      <button id="zastapAnuluj">Anuluj</button>
+    </div>
+  </div>
+</div>
 <script>
 /* =========================================================
    USTAWIENIA GŁÓWNE – tutaj zmieniasz najważniejsze rzeczy
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".23",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".24",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
   maxOczek: 60,                         // największa szerokość wzoru
   maxRzedow: 60,                        // największa liczba rzędów wzoru (liczba parzysta, bo rzędy zmieniają się po 2)
+  dniDoPrzypomnienia: 14,               // po ilu dniach bez zapisu do pliku linijka „Ostatni zapis do pliku” robi się żółta (jeśli jest co stracić)
   pomocZawsze: false,                  // true = karta Pomoc (instrukcja dodania na ekran główny) widoczna zawsze, także na komputerze (do testów)
   minSzerokoscEdycji: 640,              // na ekranie dotykowym węższym niż tyle pikseli (telefon w pionie) edycja tabeli wzoru jest zablokowana
   podgladRzedow: 8,                     // ile rzędów widać w podglądzie
@@ -478,7 +494,7 @@ function rysujProjekt(){
   $("grid").innerHTML = g;
 }
 function rysujUstawienia(){
-  etykietyProjektu();
+  etykietyProjektu(); odswiezZapis();
   $("symTab").innerHTML = DB.symbole.map((s, i) =>
     `<div class="flex"><input name="symbol-${i + 1}-znak" autocomplete="off" data-sy="${i}" data-f="s" value="${esc(s.s)}" style="width:64px;flex:none"><input name="symbol-${i + 1}-nazwa" autocomplete="off" data-sy="${i}" data-f="n" value="${esc(s.n)}"><button class="czer" data-symdel="${i}">Usuń</button></div>`).join("");
 }
@@ -640,8 +656,27 @@ $("photoIn").onchange = e => { const f = e.target.files[0]; if (!f) return;
 $("projNew").onclick = () => {
   const nazwa = ($("nowaNazwa").value || "").trim();
   if (!nazwa){ alert("Wpisz nazwę nowego projektu."); return; }
-  if (!confirm("Utworzyć nowy projekt „" + nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())) return;
-  DB.projekt = {nazwa, foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+  pytajZastap("Nowy projekt „" + nazwa + "”", "Zostanie utworzony pusty projekt.", () => {
+    DB.projekt = {nazwa, foto:"", wzory:[pusty()]}; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+  });
+};
+/* Duplikuj projekt: kopia wszystkiego z bieżącego projektu (wzory, instrukcje, notatki Info, zdjęcie, dane Prompt) z licznikami od 1; zastępuje bieżący projekt */
+$("projDup").onclick = () => {
+  if (!P().wzory.length){ alert("Brak projektu do skopiowania."); return; }
+  const nazwa = ($("nowaNazwa").value || "").trim() || (nazwaCzysta() + " (kopia)");
+  pytajZastap("Duplikat projektu „" + nazwa + "”", "Zostanie utworzona kopia bieżącego projektu z wyzerowanymi licznikami.", () => {
+    const k = JSON.parse(JSON.stringify(P()));
+    k.nazwa = nazwa; delete k.dom; delete k.ostatniZapis; k.infoBrudne = false;
+    k.wzory.forEach(w => { w.licznik = 1; w.id = uid(); });
+    DB.projekt = k; DB.ap = null; aktWzor = null; $("nowaNazwa").value = ""; resetPlikow(); zapisz(); wszystko();
+  });
+};
+/* Zmień nazwę: tylko nazwa, bez pytań i bez zastępowania danych */
+$("projRen").onclick = () => {
+  if (!P().wzory.length){ alert("Brak projektu do zmiany nazwy."); return; }
+  const nazwa = ($("nowaNazwa").value || "").trim();
+  if (!nazwa){ alert("Wpisz nową nazwę projektu."); return; }
+  P().nazwa = nazwa; P().dom = false; $("nowaNazwa").value = ""; zapisz(); wszystko();
 };
 $("projDel").onclick = () => {
   if (!confirm("Usunąć projekt „" + P().nazwa + "” z programu? Zapisany wcześniej plik zostaje." + ostrzInfo())) return;
@@ -704,12 +739,30 @@ async function zapiszPlik(tekst, nazwa, mime, opis, rozsz){
   } catch(e){ if (e && e.name === "AbortError") return false; }      // Anuluj: nic nie zapisano
   pobierz(blob, nazwa); return true;
 }
+/* Linijka „Ostatni zapis do pliku”: data zapisuje się razem z projektem; żółta, gdy dawno nie zapisywano, a jest co stracić */
+const dataPL = ms => { const d = new Date(ms), z = n => String(n).padStart(2, "0"); return z(d.getDate()) + "." + z(d.getMonth() + 1) + "." + d.getFullYear() + ", " + z(d.getHours()) + ":" + z(d.getMinutes()); };
+const coDoStracenia = () => P().wzory.some(w => w.licznik > 1 || liczNotatki(w) > 0)
+  || (!P().dom && P().wzory.some(w => w.rzedy.some(r => r.kom.some(Boolean) || r.tekst)));
+function odswiezZapis(){
+  const t = P().ostatniZapis, el = $("ostatniZapis");
+  const stary = !t || (Date.now() - t) > USTAWIENIA.dniDoPrzypomnienia * 864e5;
+  el.textContent = "Ostatni zapis do pliku: " + (t ? dataPL(t) : "brak") + (t && stary ? " (ponad " + USTAWIENIA.dniDoPrzypomnienia + " dni temu)" : "");
+  el.classList.toggle("zolty", stary && coDoStracenia());
+}
+/* Wspólne okno przed akcjami, które zastępują bieżący projekt: Zapisz dane i kontynuuj / Kontynuuj bez zapisu / Anuluj */
+let zastapAkcja = null, zastapAnuluj = null;
+function pytajZastap(tytul, opis, akcja, anuluj){
+  $("zastapTyt").textContent = tytul;
+  $("zastapOpis").textContent = opis + " Bieżący projekt „" + nazwaP() + "” zostanie zastąpiony. Jeśli chcesz go zachować, zapisz go teraz do pliku." + (maNotatki() ? " Bez zapisu notatki Info tego projektu zostaną utracone." : "");
+  zastapAkcja = akcja; zastapAnuluj = anuluj || null; $("zastapOkno").style.display = "flex";
+}
 /* Zapis projektu: po zapisie znika przypomnienie o niezapisanych danych Info (chyba że klikniesz Anuluj) */
 async function zapiszWPlikach(){
-  const bylo = P().infoBrudne; P().infoBrudne = false;               // w pliku znacznik ma być wyłączony
+  const bylo = P().infoBrudne, bylaData = P().ostatniZapis;
+  P().infoBrudne = false; P().ostatniZapis = Date.now();              // w pliku: znacznik wyłączony i data jego własnego zapisu
   const ok = await zapiszPlik(JSON.stringify(DB), nazwaPliku(), "application/json", "Projekt Knit Companion", ".json");
-  if (ok) zapisz(); else P().infoBrudne = bylo;
-  pokazZapis();
+  if (ok) zapisz(); else { P().infoBrudne = bylo; P().ostatniZapis = bylaData; }       // Anuluj: wszystko jak było
+  pokazZapis(); odswiezZapis();
   return ok;
 }
 $("exp").onclick = zapiszWPlikach;
@@ -737,6 +790,9 @@ if (USTAWIENIA.pomocZawsze || (naIOS() && !zIkony())) $("pomocKarta").style.disp
 $("pomocBtn").onclick = () => { $("pomocOkno").style.display = "flex"; };
 $("pomocAnuluj").onclick = () => { $("pomocOkno").style.display = "none"; };
 $("pomocBez").onclick = () => { location.href = "info.html"; };
+$("zastapZapisz").onclick = async () => { $("zastapOkno").style.display = "none"; if (await zapiszWPlikach()) zastapAkcja(); else if (zastapAnuluj) zastapAnuluj(); };
+$("zastapBez").onclick = () => { $("zastapOkno").style.display = "none"; zastapAkcja(); };
+$("zastapAnuluj").onclick = () => { $("zastapOkno").style.display = "none"; if (zastapAnuluj) zastapAnuluj(); };
 $("pomocZapisz").onclick = async () => { $("pomocOkno").style.display = "none"; if (await zapiszWPlikach()) location.href = "info.html"; };   // Anuluj w oknie zapisu: zostajemy w programie
 $("pwSave").onclick = () => zapiszPlik(promptWloczka(), nazwaPliku("prompt-wloczka", ".txt"), "text/plain", "Prompt do ChatGPT", ".txt");
 $("imp").onchange = e => {
@@ -746,16 +802,16 @@ $("imp").onchange = e => {
   fr.onload = () => { try {
     const t = JSON.parse(fr.result);
     if (t.v !== 3 || !t.projekt || !t.symbole) throw 0;
-    if (confirm("Wczytać projekt „" + t.projekt.nazwa + "”? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())){
+    pytajZastap("Wczytanie projektu „" + t.projekt.nazwa + "”", "Zostanie wczytany projekt z pliku.", () => {
       DB = napraw(t); DB.ap = null; aktWzor = null; $("fotoNazwa").textContent = TXT_FOTO; zapisz(); wszystko();
-    } else $("impNazwa").textContent = TXT_JSON;
+    }, () => { $("impNazwa").textContent = TXT_JSON; });
   } catch(err){ alert("To nie jest plik projektu Knit Companion (nowy format)."); $("impNazwa").textContent = TXT_JSON; } e.target.value = ""; };
   fr.readAsText(f);
 };
 
-$("defBtn").onclick = () => {
-  if (confirm("Zresetować do projektu domyślnego? Bieżący projekt zostanie zastąpiony – zapisz go wcześniej." + ostrzInfo())){ DB = dane0(); aktWzor = null; resetPlikow(); zapisz(); wszystko(); }
-};
+$("defBtn").onclick = () => pytajZastap("Reset do domyślnych", "Zostanie wczytany projekt domyślny „Kardigan z kapturem”.", () => {
+  DB = dane0(); aktWzor = null; resetPlikow(); zapisz(); wszystko();
+});
 
 /* czerwona plakietka, gdy brak internetu */
 const stanSieci = () => $("offline").style.display = navigator.onLine ? "none" : "block";
