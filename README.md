@@ -38,11 +38,13 @@ Program ma cztery zakładki: Śledzenie, Projekt, Ustawienia i Prompt.
 
 Sekcja **Zapis/Odczyt projektu: [nazwa projektu]** zawiera:
 
-- **Zapisz dane projektu**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina.
-- **Wczytaj dane projektu** (.json): wczytuje projekt z pliku i zastępuje bieżący. Program pyta o potwierdzenie (to samo przy resecie, nowym projekcie i usunięciu projektu; jeśli są notatki Info, pytanie przypomina, że zostaną utracone). Notatki Info zapisują się w pliku razem z projektem.
+- **Zapisz dane projektu**: zapisuje cały projekt do pliku. Nazwa pliku to nazwa projektu oraz data i godzina. Pod przyciskiem jest linijka **Ostatni zapis do pliku** (data jest zapisana razem z projektem). Gdy zapisu nie było albo minęło więcej niż 14 dni (ustawienie `dniDoPrzypomnienia`), a w projekcie jest coś do stracenia (licznik większy niż 1, notatki Info albo własne wzory), linijka robi się żółta.
+- **Wczytaj dane projektu** (.json): wczytuje projekt z pliku i zastępuje bieżący. Przed każdą akcją, która zastępuje bieżący projekt (wczytanie, reset, nowy projekt i duplikat), program pokazuje okno z trzema przyciskami: **Zapisz dane i kontynuuj** (najpierw zapisuje bieżący projekt do pliku; przy Anuluj w oknie zapisu nic się nie dzieje), **Kontynuuj bez zapisu** i **Anuluj**. Jeśli są notatki Info, okno przypomina, że bez zapisu zostaną utracone. Notatki Info zapisują się w pliku razem z projektem.
 - **Reset do domyślnych**: zastępuje bieżący projekt przykładowym. Przykładowy projekt jest wbudowany w program i ma w nazwie dopisek „(domyślny)”. Przy pierwszej zmianie w zakładce Projekt (wzór, zdjęcie, słownik symboli) program pyta o zgodę i zmienia dopisek na „(zmieniony)”: od tej chwili to Twój projekt zapisany w przeglądarce. Zmiany w kodzie projektu domyślnego widać dopiero po „Reset do domyślnych”.
-- **Nowy projekt**: wpisujesz nazwę i tworzysz pusty projekt.
-- **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje).
+- **Nowy projekt**: wpisujesz nazwę w polu nazwy i tworzysz pusty projekt.
+- **Zmień nazwę**: zmienia tylko nazwę bieżącego projektu (nazwa z tego samego pola), bez pytań i bez zmiany danych.
+- **Duplikuj projekt**: tworzy kopię bieżącego projektu (wzory, rzędy, instrukcje, notatki Info, zdjęcie, dane zakładki Prompt) z licznikami ustawionymi na 1 i zastępuje nim bieżący projekt. Nazwa pochodzi z pola nazwy, a gdy jest puste, kopia dostaje dopisek „(kopia)”. Kopia nie jest już „domyślna”.
+- **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje; program pyta o potwierdzenie).
 
 **Pomoc** (karta na końcu Ustawień): na iPhonie i iPadzie, w zwykłej karcie Safari, jest przycisk **Dodaj program na ekran główny**. Pyta, czy zapisać projekt do pliku (ikona na ekranie głównym ma osobne dane, więc po jej dodaniu trzeba wczytać zapisany plik przyciskiem Wczytaj dane projektu), a potem otwiera instrukcję `info.html` w tej samej karcie. W programie uruchomionym z ikony i na komputerze karty nie ma (do testów można ją włączyć ustawieniem `pomocZawsze`).
 
@@ -82,7 +84,7 @@ W ten sposób przenosisz też projekt między urządzeniami lub osobami. To kopi
 
 ## Zmiana ustawień w kodzie
 
-Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, numerem wersji, autorem, rokiem, kluczem zapisu, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, progiem szerokości edycji na telefonie (`minSzerokoscEdycji`), ustawieniem karty Pomoc (`pomocZawsze`, do testów na komputerze), zdjęciem domyślnym i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
+Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, numerem wersji, autorem, rokiem, kluczem zapisu, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, progiem szerokości edycji na telefonie (`minSzerokoscEdycji`), liczbą dni do przypomnienia o zapisie (`dniDoPrzypomnienia`), ustawieniem karty Pomoc (`pomocZawsze`, do testów na komputerze), zdjęciem domyślnym i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
 
 Uwaga: nie zmieniaj wartości `klucz`, jeśli ktoś już używa programu, bo projekt zniknie z widoku. Do testów na osobnych danych użyj innego klucza.
 
