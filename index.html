@@ -79,6 +79,8 @@ button.czer:not(.on){color:var(--czer)}
 .card{background:var(--card);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .flex>input{flex:1}
+/* pole nazwy projektu: najmniejsza szerokość 260 px; gdy przyciski się nie mieszczą obok, schodzą do drugiej linii (zamiast ściskać pole do kilku liter) */
+#nowaNazwa{flex:1 1 260px}
 .pal button{min-width:44px;font-size:18px;font-weight:700}
 #grid .crow{touch-action:none;user-select:none;-webkit-user-select:none}
 #grid label{margin-top:8px}
@@ -262,7 +264,7 @@ footer{text-align:center;color:var(--sub);font-size:14px}
    ========================================================= */
 const USTAWIENIA = {
   tytul:   "Knit Companion v 2.0",
-  wersja:  ".24",                        // dopisek w stopce, np. ".2" daje v 2.0.2
+  wersja:  ".25",                        // dopisek w stopce, np. ".2" daje v 2.0.2
   autor:   "Marta Matulewicz",
   rok:     "2026",
   klucz:   "KnitCompanion2:v3",        // pod tą nazwą dane zapisują się w przeglądarce – NIE ZMIENIAJ po starcie pracy
