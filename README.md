@@ -19,7 +19,7 @@ Program ma cztery zakładki: Śledzenie, Projekt, Ustawienia i Prompt.
 - Z listy wybierasz **wzór** (np. „Warkocz - prawy przód”).
 - Widzisz zdjęcie projektu, **panel z instrukcją** aktywnego rzędu (wpisaną w zakładce Projekt) i **tabelę** kilku następnych rzędów. Pod tabelą jest legenda symboli użytych w tym wzorze.
 - Po lewej stronie tabeli, przy aktywnym rzędzie, jest ikona jego rodzaju: **➡ normalny**, **↩ powrót** (tryb płasko, rzędy parzyste) albo **🔄 na okrągło**. Przy rzędzie powrotnym panel zaczyna się od „Powrót:” (dopisuje to program, w instrukcji wpisujesz tylko resztę).
-- **Pole Info** pod tabelą i legendą symboli („Informacja dla tego rzędu”) to miejsce na krótką notatkę techniczną przypisaną do numeru licznika, np. „-2” albo „+10” (zmniejszanie i dodawanie oczek w rękawie). Pokazuje i zmienia notatkę tylko aktywnego rzędu, zapisuje się od razu i nie wywołuje żadnych pytań. Puste pole usuwa notatkę, a duży przycisk **Del** po prawej stronie robi to jednym dotknięciem, bez klawiatury. Rzędy, które mają notatkę, są w tabeli oznaczone po lewej ikoną „i” (od chwili, gdy wejdą do podglądu), a sama treść pokazuje się dopiero przy aktywnym rzędzie. Po zmianie notatek pod polem pojawia się żółte, wyciszone przypomnienie o zapisie projektu do pliku; znika po zapisie (nie znika, jeśli klikniesz Anuluj).
+- **Pole Info** pod tabelą i legendą symboli („Informacja dla tego rzędu”) to miejsce na krótką notatkę techniczną przypisaną do numeru licznika, np. „-2” albo „+10” (zmniejszanie i dodawanie oczek w rękawie). Pokazuje i zmienia notatkę tylko aktywnego rzędu, zapisuje się od razu i nie wywołuje żadnych pytań. Puste pole usuwa notatkę, a duży przycisk **Usuń** po prawej stronie robi to jednym dotknięciem, bez klawiatury. Rzędy, które mają notatkę, są w tabeli oznaczone po lewej ikoną „i” (od chwili, gdy wejdą do podglądu), a sama treść pokazuje się dopiero przy aktywnym rzędzie. Po zmianie notatek pod polem pojawia się żółte, wyciszone przypomnienie o zapisie projektu do pliku; znika po zapisie (nie znika, jeśli klikniesz Anuluj).
 - **Duży numer** to licznik rzędu tego wzoru. Przyciski **Ukończono rząd** i **Cofnij rząd** zmieniają go o jeden. Dotknięcie numeru pozwala wpisać dowolny rząd.
 - Wzór, który nie jest „bez końca”, zatrzymuje licznik na ostatnim rzędzie: przycisk „Ukończono rząd” jest wtedy nieaktywny, w panelu pojawia się wyróżniona jaśniejszym kolorem informacja „Koniec wzoru”, a pod tabelą widać (niepodświetlony) wiersz z ikoną **bez końca**. Kliknięcie ikony włącza powtarzanie wzoru i licznik liczy dalej.
 
@@ -43,6 +43,8 @@ Sekcja **Zapis/Odczyt projektu: [nazwa projektu]** zawiera:
 - **Reset do domyślnych**: zastępuje bieżący projekt przykładowym. Przykładowy projekt jest wbudowany w program i ma w nazwie dopisek „(domyślny)”. Przy pierwszej zmianie w zakładce Projekt (wzór, zdjęcie, słownik symboli) program pyta o zgodę i zmienia dopisek na „(zmieniony)”: od tej chwili to Twój projekt zapisany w przeglądarce. Zmiany w kodzie projektu domyślnego widać dopiero po „Reset do domyślnych”.
 - **Nowy projekt**: wpisujesz nazwę i tworzysz pusty projekt.
 - **Usuń projekt**: usuwa bieżący projekt z programu (zapisany wcześniej plik zostaje).
+
+**Pomoc** (karta na końcu Ustawień): na iPhonie i iPadzie, w zwykłej karcie Safari, jest przycisk **Dodaj program na ekran główny**. Pyta, czy zapisać projekt do pliku (ikona na ekranie głównym ma osobne dane, więc po jej dodaniu trzeba wczytać zapisany plik przyciskiem Wczytaj dane projektu), a potem otwiera instrukcję `info.html` w tej samej karcie. W programie uruchomionym z ikony i na komputerze karty nie ma (do testów można ją włączyć ustawieniem `pomocZawsze`).
 
 **Słownik symboli**: znak i nazwa każdego symbolu dostępnego w palecie. Słownik zapisuje się razem z projektem. Zmiana samego znaku zmienia sens narysowanych wzorów.
 
@@ -80,7 +82,7 @@ W ten sposób przenosisz też projekt między urządzeniami lub osobami. To kopi
 
 ## Zmiana ustawień w kodzie
 
-Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, numerem wersji, autorem, rokiem, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, tekstami rzędów powrotnych i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
+Na początku skryptu w `index.html` jest blok `USTAWIENIA` z tytułem, numerem wersji, autorem, rokiem, kluczem zapisu, limitami rozmiaru wzoru, liczbą rzędów w podglądzie, progiem szerokości edycji na telefonie (`minSzerokoscEdycji`), ustawieniem karty Pomoc (`pomocZawsze`, do testów na komputerze), zdjęciem domyślnym i domyślnym słownikiem symboli. Każda pozycja ma komentarz po polsku.
 
 Uwaga: nie zmieniaj wartości `klucz`, jeśli ktoś już używa programu, bo projekt zniknie z widoku. Do testów na osobnych danych użyj innego klucza.
 
@@ -98,6 +100,7 @@ Zmiany sprawdzaj najpierw lokalnie: otwórz `index.html` dwuklikiem. Dane lokaln
 
 ```
 index.html          cały program
+info.html           instrukcja dodania programu na ekran główny (iPhone, iPad)
 img/domyslne.jpg    zdjęcie przykładowego projektu
 README.md           ten plik
 ```
